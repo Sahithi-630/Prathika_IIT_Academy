@@ -57,7 +57,8 @@ const Inquiry = mongoose.model('Inquiry', inquirySchema);
 const mockTestSchema = new mongoose.Schema({
   subject: { type: String, required: true },
   dateTime: { type: String, required: true },
-  syllabus: { type: String, required: true }
+  syllabus: { type: String, required: true },
+  class: { type: String, required: true, default: 'All Classes' }
 });
 const MockTest = mongoose.model('MockTest', mockTestSchema);
 
@@ -72,9 +73,18 @@ const Announcement = mongoose.model('Announcement', announcementSchema);
 const studyMaterialSchema = new mongoose.Schema({
   title: { type: String, required: true },
   subject: { type: String, required: true },
-  url: { type: String, required: true }
+  url: { type: String, required: true },
+  class: { type: String, required: true, default: 'All Classes' }
 });
 const StudyMaterial = mongoose.model('StudyMaterial', studyMaterialSchema);
+
+const meetLinkSchema = new mongoose.Schema({
+  subject: { type: String, required: true },
+  dateTime: { type: String, required: true },
+  url: { type: String, required: true },
+  class: { type: String, required: true }
+});
+const MeetLink = mongoose.model('MeetLink', meetLinkSchema);
 
 const doubtSchema = new mongoose.Schema({
   studentUsername: { type: String, required: true },
@@ -418,7 +428,12 @@ app.delete('/api/inquiries/:id', async (req, res) => {
 // 3. Mock Tests
 app.get('/api/tests', async (req, res) => {
   try {
-    const tests = await MockTest.find({});
+    const { class: studentClass } = req.query;
+    let filter = {};
+    if (studentClass) {
+      filter.class = { $in: [studentClass, 'All Classes'] };
+    }
+    const tests = await MockTest.find(filter);
     res.json(tests);
   } catch (error) {
     res.status(500).json({ error: 'Server error retrieving tests' });
@@ -427,11 +442,11 @@ app.get('/api/tests', async (req, res) => {
 
 app.post('/api/tests', async (req, res) => {
   try {
-    const { subject, dateTime, syllabus } = req.body;
-    if (!subject || !dateTime || !syllabus) {
+    const { subject, dateTime, syllabus, class: targetClass } = req.body;
+    if (!subject || !dateTime || !syllabus || !targetClass) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-    const newTest = new MockTest({ subject, dateTime, syllabus });
+    const newTest = new MockTest({ subject, dateTime, syllabus, class: targetClass });
     const saved = await newTest.save();
     res.status(201).json(saved);
   } catch (error) {
@@ -495,7 +510,12 @@ app.delete('/api/announcements/:id', async (req, res) => {
 // 5. Study Materials
 app.get('/api/study', async (req, res) => {
   try {
-    const study = await StudyMaterial.find({});
+    const { class: studentClass } = req.query;
+    let filter = {};
+    if (studentClass) {
+      filter.class = { $in: [studentClass, 'All Classes'] };
+    }
+    const study = await StudyMaterial.find(filter);
     res.json(study);
   } catch (error) {
     res.status(500).json({ error: 'Server error retrieving study materials' });
@@ -504,11 +524,11 @@ app.get('/api/study', async (req, res) => {
 
 app.post('/api/study', async (req, res) => {
   try {
-    const { title, subject, url } = req.body;
-    if (!title || !subject || !url) {
+    const { title, subject, url, class: targetClass } = req.body;
+    if (!title || !subject || !url || !targetClass) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-    const newStudy = new StudyMaterial({ title, subject, url });
+    const newStudy = new StudyMaterial({ title, subject, url, class: targetClass });
     const saved = await newStudy.save();
     res.status(201).json(saved);
   } catch (error) {
@@ -581,6 +601,97 @@ app.put('/api/doubts/:id', async (req, res) => {
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: 'Server error updating doubt reply' });
+  }
+});
+
+// ==========================================
+// 7. STUDENTS MANAGER (ADMIN ONLY)
+// ==========================================
+app.get('/api/students', async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student' });
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error retrieving students list' });
+  }
+});
+
+app.post('/api/students', async (req, res) => {
+  try {
+    const { username, password, fullName, class: studentClass } = req.body;
+    if (!username || !password || !fullName || !studentClass) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    const existingUser = await User.findOne({ username: username.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ error: `Username "${username}" is already taken` });
+    }
+    const newStudent = new User({
+      username: username.toLowerCase(),
+      password,
+      fullName,
+      class: studentClass,
+      role: 'student'
+    });
+    const saved = await newStudent.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error creating student account' });
+  }
+});
+
+app.delete('/api/students/:id', async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    res.json({ message: 'Student account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error deleting student account' });
+  }
+});
+
+// ==========================================
+// 8. LIVE CLASSES (MEET LINKS)
+// ==========================================
+app.get('/api/meet-links', async (req, res) => {
+  try {
+    const { class: studentClass } = req.query;
+    let filter = {};
+    if (studentClass) {
+      filter.class = { $in: [studentClass, 'All Classes'] };
+    }
+    const links = await MeetLink.find(filter);
+    res.json(links);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error retrieving live classes' });
+  }
+});
+
+app.post('/api/meet-links', async (req, res) => {
+  try {
+    const { subject, dateTime, url, class: targetClass } = req.body;
+    if (!subject || !dateTime || !url || !targetClass) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    const newLink = new MeetLink({ subject, dateTime, url, class: targetClass });
+    const saved = await newLink.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error scheduling live class' });
+  }
+});
+
+app.delete('/api/meet-links/:id', async (req, res) => {
+  try {
+    const deleted = await MeetLink.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Live class link not found' });
+    }
+    res.json({ message: 'Live class link deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error deleting live class link' });
   }
 });
 

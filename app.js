@@ -5,7 +5,18 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* ==========================================================================
+    // Override fetch to automatically redirect relative API calls to localhost:3000 if running on a dev server or file scheme
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+        if (typeof input === 'string' && input.startsWith('/api/')) {
+            if (window.location.protocol === 'file:' || !window.location.port || window.location.port !== '3000') {
+                input = `http://localhost:3000${input}`;
+            }
+        }
+        return originalFetch(input, init);
+    };
+
+    /* ==========================================================================================================
        1. STICKY HEADER TRANSITION ON SCROLL
        ========================================================================== */
     const header = document.querySelector('.main-header');

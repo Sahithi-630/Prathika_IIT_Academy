@@ -11,7 +11,7 @@
     <!-- Portal Custom Styles -->
     <link rel="stylesheet" href="portal.css">
     <!-- Google Identity Services (GIS) library -->
-    <script src="https://accounts.google.com/gsi/client" onload="initGoogleSignIn()" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="portal-body">
 
@@ -71,70 +71,10 @@
                     <p id="tipText">Student: <code>student</code> / Password: <code>student123</code></p>
                 </div>
 
-                <!-- Registration Toggle Link (Only for students) -->
-                <div class="register-prompt" id="registerPrompt">
-                    New Student? <a href="#" id="toggleRegisterLink">Create an Account</a>
-                </div>
-
                 <div class="divider-or" id="googleDivider">
                     <span>OR</span>
                 </div>
                 <div id="googleSignInButton" class="google-signin-btn-container"></div>
-            </form>
-
-            <!-- Registration Form (Hidden by default) -->
-            <form class="login-form hidden" id="registerForm">
-                <div class="form-group">
-                    <label for="regFullName">Full Name *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-regular fa-user"></i>
-                        <input type="text" id="regFullName" required placeholder="Student's name">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="regClass">Class/Standard *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                        <select id="regClass" required>
-                            <option value="" disabled selected>Select Class</option>
-                            <option value="Class 6">Class 6 (IIT Foundation)</option>
-                            <option value="Class 7">Class 7 (IIT Foundation)</option>
-                            <option value="Class 8">Class 8 (IIT Foundation)</option>
-                            <option value="Class 9">Class 9 (IIT Foundation)</option>
-                            <option value="Class 10">Class 10 (IIT Foundation)</option>
-                            <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
-                            <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="regUsername">Username *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-at"></i>
-                        <input type="text" id="regUsername" required placeholder="Choose unique username">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="regPassword">Password *</label>
-                    <div class="input-icon-wrapper">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="regPassword" required placeholder="Choose password">
-                    </div>
-                </div>
-
-                <div id="regErrorMessage" class="error-message"></div>
-                <div id="regSuccessMessage" class="success-message"></div>
-
-                <button type="submit" class="btn btn-gold btn-block btn-login">
-                    <i class="fa-solid fa-user-plus"></i> Register & Create Account
-                </button>
-
-                <div class="register-prompt">
-                    Already have an account? <a href="#" id="toggleLoginLink">Sign In</a>
-                </div>
             </form>
         </div>
     </div>
@@ -162,8 +102,14 @@
                     <i class="fa-solid fa-user-tag"></i> Inquiries Manager
                     <span class="badge badge-gold" id="inqCountBadge">0</span>
                 </a>
+                <a href="#" class="menu-item" data-target="admin-students" onclick="switchDashboardTab('admin', 'admin-students')">
+                    <i class="fa-solid fa-users"></i> Students Manager
+                </a>
                 <a href="#" class="menu-item" data-target="admin-tests" onclick="switchDashboardTab('admin', 'admin-tests')">
                     <i class="fa-solid fa-file-signature"></i> Mock Test Scheduler
+                </a>
+                <a href="#" class="menu-item" data-target="admin-live" onclick="switchDashboardTab('admin', 'admin-live')">
+                    <i class="fa-solid fa-video"></i> Live Classes
                 </a>
                 <a href="#" class="menu-item" data-target="admin-announcements" onclick="switchDashboardTab('admin', 'admin-announcements')">
                     <i class="fa-solid fa-bullhorn"></i> Announcements
@@ -315,6 +261,20 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="testClassTarget">Target Class/Standard *</label>
+                                <select id="testClassTarget" required>
+                                    <option value="" disabled selected>Select Target Class</option>
+                                    <option value="All Classes">All Batches</option>
+                                    <option value="Class 6">Class 6 (IIT Foundation)</option>
+                                    <option value="Class 7">Class 7 (IIT Foundation)</option>
+                                    <option value="Class 8">Class 8 (IIT Foundation)</option>
+                                    <option value="Class 9">Class 9 (IIT Foundation)</option>
+                                    <option value="Class 10">Class 10 (IIT Foundation)</option>
+                                    <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                                    <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="testSyllabus">Syllabus / Topics covered *</label>
                                 <textarea id="testSyllabus" required rows="3" placeholder="E.g., Trigonometry equations, Organic Carbon chains, Electrostatics basics"></textarea>
                             </div>
@@ -342,6 +302,7 @@
                                 <thead>
                                     <tr>
                                         <th>Subject</th>
+                                        <th>Target Batch</th>
                                         <th>Date & Time</th>
                                         <th>Syllabus Details</th>
                                         <th>Action</th>
@@ -416,6 +377,20 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="studyClassTarget">Target Class/Standard *</label>
+                                <select id="studyClassTarget" required>
+                                    <option value="" disabled selected>Select Target Class</option>
+                                    <option value="All Classes">All Batches</option>
+                                    <option value="Class 6">Class 6 (IIT Foundation)</option>
+                                    <option value="Class 7">Class 7 (IIT Foundation)</option>
+                                    <option value="Class 8">Class 8 (IIT Foundation)</option>
+                                    <option value="Class 9">Class 9 (IIT Foundation)</option>
+                                    <option value="Class 10">Class 10 (IIT Foundation)</option>
+                                    <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                                    <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="studyUrl">Resource URL / Google Drive link *</label>
                                 <input type="url" id="studyUrl" required placeholder="https://drive.google.com/..." value="https://drive.google.com/">
                             </div>
@@ -434,6 +409,7 @@
                                     <tr>
                                         <th>Material Title</th>
                                         <th>Subject</th>
+                                        <th>Target Batch</th>
                                         <th>Access Link</th>
                                         <th>Action</th>
                                     </tr>
@@ -471,6 +447,137 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Tab 7: Students Manager -->
+            <section class="tab-panel" id="admin-students">
+                <div class="split-layout">
+                    <!-- Column Left: Register a New Student -->
+                    <div class="form-card">
+                        <h4>Register New Student Account</h4>
+                        <p class="form-desc">Create login credentials for premium academy students.</p>
+                        <form id="adminAddStudentForm" class="dashboard-form">
+                            <div class="form-group">
+                                <label for="studentRegFullName">Student's Full Name *</label>
+                                <input type="text" id="studentRegFullName" required placeholder="E.g., Sahithi Bhumireddy">
+                            </div>
+                            <div class="form-group">
+                                <label for="studentRegClass">Class/Standard *</label>
+                                <select id="studentRegClass" required>
+                                    <option value="" disabled selected>Select Class</option>
+                                    <option value="Class 6">Class 6 (IIT Foundation)</option>
+                                    <option value="Class 7">Class 7 (IIT Foundation)</option>
+                                    <option value="Class 8">Class 8 (IIT Foundation)</option>
+                                    <option value="Class 9">Class 9 (IIT Foundation)</option>
+                                    <option value="Class 10">Class 10 (IIT Foundation)</option>
+                                    <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                                    <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentRegUsername">Login Username *</label>
+                                <input type="text" id="studentRegUsername" required placeholder="E.g., sahithi.b">
+                            </div>
+                            <div class="form-group">
+                                <label for="studentRegPassword">Login Password *</label>
+                                <input type="text" id="studentRegPassword" required placeholder="Choose password">
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-block">
+                                <i class="fa-solid fa-user-plus"></i> Create Student Account
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column Right: List of Registered Students -->
+                    <div class="dashboard-table-card">
+                        <h4>Registered Students Database</h4>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Class</th>
+                                        <th>Username</th>
+                                        <th>Password</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminStudentsList">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 8: Live Classes (Google Meet Links) -->
+            <section class="tab-panel" id="admin-live">
+                <div class="split-layout">
+                    <!-- Column Left: Schedule Live Class -->
+                    <div class="form-card">
+                        <h4>Schedule Live Online Class</h4>
+                        <p class="form-desc">Post a new Google Meet or video link for specific batches.</p>
+                        <form id="adminScheduleLiveForm" class="dashboard-form">
+                            <div class="form-group">
+                                <label for="liveSubject">Subject *</label>
+                                <select id="liveSubject" required>
+                                    <option value="" disabled selected>Select Subject</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="General Academic">General Academic</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="liveClassTarget">Target Class/Standard *</label>
+                                <select id="liveClassTarget" required>
+                                    <option value="" disabled selected>Select Batch</option>
+                                    <option value="All Classes">All Batches</option>
+                                    <option value="Class 6">Class 6 (IIT Foundation)</option>
+                                    <option value="Class 7">Class 7 (IIT Foundation)</option>
+                                    <option value="Class 8">Class 8 (IIT Foundation)</option>
+                                    <option value="Class 9">Class 9 (IIT Foundation)</option>
+                                    <option value="Class 10">Class 10 (IIT Foundation)</option>
+                                    <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                                    <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="liveDateTime">Scheduled Date & Time *</label>
+                                <input type="text" id="liveDateTime" required placeholder="E.g., Today, 4:00 PM - 5:30 PM">
+                            </div>
+                            <div class="form-group">
+                                <label for="liveUrl">Google Meet Class Link *</label>
+                                <input type="url" id="liveUrl" required placeholder="https://meet.google.com/..." value="https://meet.google.com/">
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-block">
+                                <i class="fa-solid fa-calendar-plus"></i> Post Live Class Link
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column Right: Active Live Class Links -->
+                    <div class="dashboard-table-card">
+                        <h4>Active Live Class Links</h4>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Target Batch</th>
+                                        <th>Date & Time</th>
+                                        <th>Meet Link</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminLiveClassesList">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -493,8 +600,11 @@
                 <a href="#" class="menu-item active" data-target="student-courses" onclick="switchDashboardTab('student', 'student-courses')">
                     <i class="fa-solid fa-calendar-check"></i> Course & Exams
                 </a>
+                <a href="#" class="menu-item" data-target="student-live" onclick="switchDashboardTab('student', 'student-live')">
+                    <i class="fa-solid fa-video"></i> Live Classes
+                </a>
                 <a href="#" class="menu-item" data-target="student-study" onclick="switchDashboardTab('student', 'student-study')">
-                    <i class="fa-solid fa-book-open"></i> Notes Library
+                    <i class="fa-solid fa-book-open"></i> Recorded Classes & Notes
                 </a>
                 <a href="#" class="menu-item" data-target="student-announcements" onclick="switchDashboardTab('student', 'student-announcements')">
                     <i class="fa-solid fa-bullhorn"></i> Announcements
@@ -556,6 +666,30 @@
                                 </tr>
                             </thead>
                             <tbody id="studentTestsList">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 5: Live Classes (Google Meet Links) -->
+            <section class="tab-panel" id="student-live">
+                <div class="dashboard-table-card">
+                    <div class="card-header border-bottom">
+                        <h4>Live Online Classes</h4>
+                        <span>Click the meet links below to join scheduled interactive live sessions with your teacher.</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Scheduled Date & Time</th>
+                                    <th>Link Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentLiveClassesList">
                                 <!-- Populated dynamically -->
                             </tbody>
                         </table>

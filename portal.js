@@ -8,6 +8,17 @@ let loggedInUser = null; // Holds user object
 let loadedInquiries = []; // Cache loaded inquiries
 let loadedDoubts = []; // Cache loaded doubts
 
+// Override fetch to automatically redirect relative API calls to localhost:3000 if running on a dev server or file scheme
+const originalFetch = window.fetch;
+window.fetch = function(input, init) {
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+        if (window.location.protocol === 'file:' || !window.location.port || window.location.port !== '3000') {
+            input = `http://localhost:3000${input}`;
+        }
+    }
+    return originalFetch(input, init);
+};
+
 // Pre-seeded database keys in localStorage if empty - NOT NEEDED
 const DB_KEYS = {};
 
@@ -19,6 +30,37 @@ document.addEventListener('DOMContentLoaded', () => {
     seedInitialData();
     setupAuthListeners();
     setupDashboardDate();
+
+    // Restore login session on refresh
+    const savedUser = sessionStorage.getItem('portalUser');
+    if (savedUser) {
+        try {
+            loggedInUser = JSON.parse(savedUser);
+            currentRole = loggedInUser.role;
+            document.getElementById('loginWrapper').classList.add('hidden');
+            if (loggedInUser.role === 'admin') {
+                openAdminDashboard();
+            } else {
+                openStudentDashboard(loggedInUser);
+            }
+        } catch (e) {
+            console.error('Failed to restore session:', e);
+            sessionStorage.removeItem('portalUser');
+        }
+    }
+
+    // Wait for the Google script to load asynchronously
+    let attempts = 0;
+    const googleCheckInterval = setInterval(() => {
+        attempts++;
+        if (typeof google !== 'undefined') {
+            clearInterval(googleCheckInterval);
+            window.initGoogleSignIn();
+        } else if (attempts >= 10) {
+            clearInterval(googleCheckInterval);
+            window.initGoogleSignIn(); // trigger fallback button rendering
+        }
+    }, 500);
 });
 
 // Set current dates in headers
@@ -124,6 +166,7 @@ function setupAuthListeners() {
                 // Successful login
                 loginError.style.display = 'none';
                 loggedInUser = matchedUser;
+                sessionStorage.setItem('portalUser', JSON.stringify(matchedUser));
                 document.getElementById('loginWrapper').classList.add('hidden');
                 
                 // Reset form values
@@ -138,7 +181,11 @@ function setupAuthListeners() {
             })
             .catch(err => {
                 loginError.style.display = 'block';
-                loginError.textContent = err.message || `Invalid Username or Password. Please try again.`;
+                if (err.message.includes('Failed to fetch') || err.message.includes('fetch')) {
+                    loginError.innerHTML = `<strong>Backend server is offline.</strong><br>Please start the server by running <code>node server.js</code> in your terminal.`;
+                } else {
+                    loginError.textContent = err.message || `Invalid Username or Password. Please try again.`;
+                }
             });
         });
     }
@@ -194,6 +241,7 @@ function setupAuthListeners() {
 // Log out handler
 function logout() {
     loggedInUser = null;
+    sessionStorage.removeItem('portalUser');
     document.getElementById('adminPortal').classList.add('hidden');
     document.getElementById('studentPortal').classList.add('hidden');
     document.getElementById('loginWrapper').classList.remove('hidden');
@@ -229,12 +277,15 @@ function switchDashboardTab(role, tabId) {
     if (role === 'admin') {
         if (tabId === 'admin-overview') renderAdminOverview();
         else if (tabId === 'admin-inquiries') renderAdminInquiries();
+        else if (tabId === 'admin-students') renderAdminStudents();
         else if (tabId === 'admin-tests') renderAdminTests();
+        else if (tabId === 'admin-live') renderAdminLiveClasses();
         else if (tabId === 'admin-announcements') renderAdminAnnouncements();
         else if (tabId === 'admin-study') renderAdminStudy();
         else if (tabId === 'admin-doubts') renderAdminDoubts();
     } else {
         if (tabId === 'student-courses') renderStudentTests();
+        else if (tabId === 'student-live') renderStudentLiveClasses();
         else if (tabId === 'student-study') renderStudentStudy();
         else if (tabId === 'student-announcements') renderStudentAnnouncements();
         else if (tabId === 'student-doubts') renderStudentDoubts();
@@ -415,7 +466,7 @@ function renderAdminTests() {
             testsList.innerHTML = '';
 
             if (tests.length === 0) {
-                testsList.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No mock tests scheduled.</td></tr>`;
+                testsList.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No mock tests scheduled.</td></tr>`;
                 return;
             }
 
@@ -427,6 +478,7 @@ function renderAdminTests() {
                 });
                 row.innerHTML = `
                     <td><strong>${escapeHtml(test.subject)}</strong></td>
+                    <td><span class="status-badge status-enrolled">${escapeHtml(test.class || 'All Classes')}</span></td>
                     <td>${escapeHtml(formattedDate)}</td>
                     <td><div style="font-size: 0.8rem; line-height: 1.4;">${escapeHtml(test.syllabus)}</div></td>
                     <td>
@@ -511,7 +563,7 @@ function renderAdminStudy() {
             studyList.innerHTML = '';
 
             if (study.length === 0) {
-                studyList.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No study materials added.</td></tr>`;
+                studyList.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No study materials added.</td></tr>`;
                 return;
             }
 
@@ -520,6 +572,7 @@ function renderAdminStudy() {
                 row.innerHTML = `
                     <td><strong>${escapeHtml(item.title)}</strong></td>
                     <td><span style="font-size: 0.8rem; font-weight: 500;">${escapeHtml(item.subject)}</span></td>
+                    <td><span class="status-badge status-pending">${escapeHtml(item.class || 'All Classes')}</span></td>
                     <td><a href="${escapeHtml(item.url)}" target="_blank" class="study-download-link"><i class="fa-solid fa-up-right-from-square"></i> Open Link</a></td>
                     <td>
                         <button class="btn-delete" onclick="deleteStudyMaterial('${item.id}')" title="Delete Material">
@@ -605,6 +658,7 @@ function setupAdminForms() {
         testForm.onsubmit = (e) => {
             e.preventDefault();
             const subject = document.getElementById('testSubject').value;
+            const targetClass = document.getElementById('testClassTarget').value;
             const syllabus = document.getElementById('testSyllabus').value.trim();
             const date = document.getElementById('testDate').value;
             const time = document.getElementById('testTime').value;
@@ -612,7 +666,7 @@ function setupAdminForms() {
             fetch('/api/tests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject, dateTime: `${date}T${time}`, syllabus })
+                body: JSON.stringify({ subject, dateTime: `${date}T${time}`, syllabus, class: targetClass })
             })
             .then(res => {
                 if (!res.ok) throw new Error('Failed to schedule test');
@@ -651,17 +705,69 @@ function setupAdminForms() {
             e.preventDefault();
             const title = document.getElementById('studyTitle').value.trim();
             const subject = document.getElementById('studySubject').value;
+            const targetClass = document.getElementById('studyClassTarget').value;
             const url = document.getElementById('studyUrl').value.trim();
 
             fetch('/api/study', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, subject, url })
+                body: JSON.stringify({ title, subject, url, class: targetClass })
             })
             .then(res => {
                 if (!res.ok) throw new Error('Failed to add study material');
                 studyForm.reset();
                 renderAdminStudy();
+            })
+            .catch(err => console.error(err));
+        };
+    }
+
+    const studentForm = document.getElementById('adminAddStudentForm');
+    if (studentForm) {
+        studentForm.onsubmit = (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById('studentRegFullName').value.trim();
+            const studentClass = document.getElementById('studentRegClass').value;
+            const username = document.getElementById('studentRegUsername').value.trim();
+            const password = document.getElementById('studentRegPassword').value.trim();
+
+            fetch('/api/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, fullName, class: studentClass })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(data => { throw new Error(data.error || 'Failed to add student') });
+                }
+                studentForm.reset();
+                renderAdminStudents();
+            })
+            .catch(err => {
+                console.error(err);
+                alert(err.message || 'Error creating student account');
+            });
+        };
+    }
+
+    const liveForm = document.getElementById('adminScheduleLiveForm');
+    if (liveForm) {
+        liveForm.onsubmit = (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('liveSubject').value;
+            const targetClass = document.getElementById('liveClassTarget').value;
+            const dateTime = document.getElementById('liveDateTime').value.trim();
+            const url = document.getElementById('liveUrl').value.trim();
+
+            fetch('/api/meet-links', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subject, dateTime, url, class: targetClass })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to post live class link');
+                liveForm.reset();
+                renderAdminLiveClasses();
             })
             .catch(err => console.error(err));
         };
@@ -708,7 +814,8 @@ function openStudentDashboard(user) {
 }
 
 function renderStudentTests() {
-    fetch('/api/tests')
+    if (!loggedInUser) return;
+    fetch('/api/tests?class=' + encodeURIComponent(loggedInUser.class))
         .then(res => res.json())
         .then(data => {
             const tests = data.map(x => ({ ...x, id: x._id }));
@@ -738,7 +845,8 @@ function renderStudentTests() {
 }
 
 function renderStudentStudy() {
-    fetch('/api/study')
+    if (!loggedInUser) return;
+    fetch('/api/study?class=' + encodeURIComponent(loggedInUser.class))
         .then(res => res.json())
         .then(data => {
             const study = data.map(x => ({ ...x, id: x._id }));
@@ -888,33 +996,97 @@ let googleInitialized = false;
 
 window.initGoogleSignIn = function() {
     if (googleInitialized) return;
-    if (typeof google === 'undefined') return;
-    
-    googleInitialized = true;
     
     fetch('/api/config')
         .then(res => res.json())
         .then(config => {
-            const clientId = config.googleClientId || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+            const hasRealClientId = config.googleClientId && 
+                                   config.googleClientId !== 'YOUR_GOOGLE_CLIENT_ID' && 
+                                   !config.googleClientId.includes('placeholder') &&
+                                   config.googleClientId.trim() !== '';
             
-            google.accounts.id.initialize({
-                client_id: clientId,
-                callback: handleGoogleSignIn
-            });
-            
-            const btnContainer = document.getElementById('googleSignInButton');
-            if (btnContainer) {
-                google.accounts.id.renderButton(
-                    btnContainer,
-                    { theme: 'outline', size: 'large', width: 380, logo_alignment: 'left' }
-                );
+            if (hasRealClientId && typeof google !== 'undefined') {
+                googleInitialized = true;
+                google.accounts.id.initialize({
+                    client_id: config.googleClientId,
+                    callback: handleGoogleSignIn
+                });
+                
+                const btnContainer = document.getElementById('googleSignInButton');
+                if (btnContainer) {
+                    google.accounts.id.renderButton(
+                        btnContainer,
+                        { theme: 'outline', size: 'large', width: 380, logo_alignment: 'left' }
+                    );
+                }
+            } else {
+                // Render Mock Google button for local development/testing
+                renderMockGoogleButton();
             }
         })
         .catch(err => {
             console.error('Failed to load Google OAuth configuration:', err);
-            googleInitialized = false; // allow retry
+            renderMockGoogleButton(); // fallback to mock button
         });
 };
+
+function renderMockGoogleButton() {
+    const btnContainer = document.getElementById('googleSignInButton');
+    if (!btnContainer) return;
+    
+    btnContainer.innerHTML = '';
+    
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'custom-google-btn';
+    btn.style.width = '100%';
+    btn.style.height = '40px';
+    btn.style.borderRadius = '4px';
+    btn.style.border = '1px solid rgba(212, 175, 55, 0.3)';
+    btn.style.background = 'transparent';
+    btn.style.color = '#fff';
+    btn.style.fontSize = '0.9rem';
+    btn.style.fontWeight = '500';
+    btn.style.cursor = 'pointer';
+    btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
+    btn.style.justifyContent = 'center';
+    btn.style.gap = '10px';
+    btn.style.transition = 'background 0.2s, border-color 0.2s';
+    
+    btn.innerHTML = `
+        <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'><path fill='%234285F4' d='M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8c-.2 1.1-.8 2-1.8 2.6v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.4z'/><path fill='%2334A853' d='M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.8-3.1.8-2.4 0-4.4-1.6-5.1-3.8H.9v2.3C2.4 15.9 5.5 18 9 18z'/><path fill='%23FBBC05' d='M3.9 10.6c-.2-.5-.3-1.1-.3-1.6s.1-1.1.3-1.6V5.1H.9C.3 6.3 0 7.6 0 9s.3 2.7.9 3.9l3-2.3z'/><path fill='%23EA4335' d='M9 3.6c1.3 0 2.5.4 3.4 1.3l2.6-2.6C13.4 1 11.4 0 9 0 5.5 0 2.4 2.1.9 5.1l3 2.3c.7-2.2 2.7-3.8 5.1-3.8z'/></svg>
+        <span>Sign in with Google (Demo)</span>
+    `;
+    
+    btn.onmouseover = () => { 
+        btn.style.background = 'rgba(255,255,255,0.05)'; 
+        btn.style.borderColor = 'rgba(212, 175, 55, 0.6)';
+    };
+    btn.onmouseout = () => { 
+        btn.style.background = 'transparent'; 
+        btn.style.borderColor = 'rgba(212, 175, 55, 0.3)';
+    };
+    
+    btn.onclick = () => {
+        triggerMockGoogleLogin();
+    };
+    
+    btnContainer.appendChild(btn);
+}
+
+function triggerMockGoogleLogin() {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+        email: 'bhumireddysahithi_student@gmail.com',
+        name: 'Sahithi Bhumireddy',
+        sub: 'mockgoogleuser123456789'
+    }));
+    const signature = 'mocksignature';
+    const mockIdToken = `${header}.${payload}.${signature}`;
+    
+    handleGoogleSignIn({ credential: mockIdToken });
+}
 
 function handleGoogleSignIn(response) {
     const loginError = document.getElementById('loginErrorMessage');
@@ -923,7 +1095,7 @@ function handleGoogleSignIn(response) {
     fetch('/api/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential })
+        body: JSON.stringify({ idToken: response.credential })
     })
     .then(res => {
         if (!res.ok) {
@@ -942,6 +1114,7 @@ function handleGoogleSignIn(response) {
 
         // Successful login
         loggedInUser = matchedUser;
+        sessionStorage.setItem('portalUser', JSON.stringify(matchedUser));
         document.getElementById('loginWrapper').classList.add('hidden');
         
         // Reset login form
@@ -954,8 +1127,134 @@ function handleGoogleSignIn(response) {
     .catch(err => {
         if (loginError) {
             loginError.style.display = 'block';
-            loginError.textContent = err.message || `Google Sign-in failed. Please try username/password.`;
+            if (err.message.includes('Failed to fetch') || err.message.includes('fetch')) {
+                loginError.innerHTML = `<strong>Backend server is offline.</strong><br>Please start the server by running <code>node server.js</code> in your terminal.`;
+            } else {
+                loginError.textContent = err.message || `Google Sign-in failed. Please try username/password.`;
+            }
         }
     });
 }
+
+// ==========================================
+// 7. STUDENTS & LIVE MEET LINKS UTILITIES
+// ==========================================
+function renderAdminStudents() {
+    fetch('/api/students')
+        .then(res => res.json())
+        .then(data => {
+            const listContainer = document.getElementById('adminStudentsList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No student accounts registered yet.</td></tr>`;
+                return;
+            }
+
+            data.forEach(student => {
+                const row = document.createElement('tr');
+                const isGoogleUser = student.password.startsWith('google-oauth-managed-');
+                const passwordDisplay = isGoogleUser ? '<em>Google Linked</em>' : `<code>${escapeHtml(student.password)}</code>`;
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(student.fullName)}</strong></td>
+                    <td><span class="status-badge status-enrolled">${escapeHtml(student.class)}</span></td>
+                    <td><code>${escapeHtml(student.username)}</code></td>
+                    <td>${passwordDisplay}</td>
+                    <td>
+                        <button class="btn-delete" onclick="deleteStudent('${student._id}')" title="Delete Student">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                listContainer.appendChild(row);
+            });
+        })
+        .catch(err => console.error('Error rendering admin students:', err));
+}
+
+function deleteStudent(id) {
+    if (confirm('Are you sure you want to permanently delete this student account?')) {
+        fetch(`/api/students/${id}`, { method: 'DELETE' })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to delete student');
+                renderAdminStudents();
+            })
+            .catch(err => console.error(err));
+    }
+}
+
+function renderAdminLiveClasses() {
+    fetch('/api/meet-links')
+        .then(res => res.json())
+        .then(data => {
+            const listContainer = document.getElementById('adminLiveClassesList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                listContainer.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No live classes scheduled.</td></tr>`;
+                return;
+            }
+
+            data.forEach(link => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(link.subject)}</strong></td>
+                    <td><span class="status-badge status-enrolled">${escapeHtml(link.class)}</span></td>
+                    <td>${escapeHtml(link.dateTime)}</td>
+                    <td><a href="${escapeHtml(link.url)}" target="_blank" class="study-download-link"><i class="fa-solid fa-video"></i> Join Link</a></td>
+                    <td>
+                        <button class="btn-delete" onclick="deleteMeetLink('${link._id}')" title="Delete Live Class">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                listContainer.appendChild(row);
+            });
+        })
+        .catch(err => console.error('Error rendering admin live classes:', err));
+}
+
+function deleteMeetLink(id) {
+    if (confirm('Are you sure you want to delete this live class link?')) {
+        fetch(`/api/meet-links/${id}`, { method: 'DELETE' })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to delete live class link');
+                renderAdminLiveClasses();
+            })
+            .catch(err => console.error(err));
+    }
+}
+
+function renderStudentLiveClasses() {
+    if (!loggedInUser) return;
+    fetch(`/api/meet-links?class=${encodeURIComponent(loggedInUser.class)}`)
+        .then(res => res.json())
+        .then(data => {
+            const listContainer = document.getElementById('studentLiveClassesList');
+            if (!listContainer) return;
+            listContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                listContainer.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No live classes scheduled for your batch.</td></tr>`;
+                return;
+            }
+
+            const sorted = [...data].reverse();
+
+            sorted.forEach(link => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(link.subject)}</strong></td>
+                    <td>${escapeHtml(link.dateTime)}</td>
+                    <td><a href="${escapeHtml(link.url)}" target="_blank" class="study-download-link"><i class="fa-solid fa-video"></i> Join Class (Google Meet)</a></td>
+                `;
+                listContainer.appendChild(row);
+            });
+        })
+        .catch(err => console.error('Error rendering student live classes:', err));
+}
+
 
