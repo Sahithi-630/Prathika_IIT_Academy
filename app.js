@@ -183,15 +183,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const phoneNumber = document.getElementById('phoneNumber').value;
         const message = document.getElementById('message').value;
         
-        // Log locally to simulate receipt of data
-        console.log('Inquiry Captured:', {
-            studentName,
-            parentName,
-            studentClass,
-            targetExam,
-            phoneNumber,
-            message,
-            timestamp: new Date().toISOString()
+        // POST to backend API
+        fetch('/api/inquiries', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                studentName,
+                parentName,
+                studentClass,
+                targetExam,
+                phoneNumber,
+                message
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Inquiry Captured in database:', data);
+        })
+        .catch(err => {
+            console.error('Error saving inquiry:', err);
         });
         
         // Elegant animation transitions to success state

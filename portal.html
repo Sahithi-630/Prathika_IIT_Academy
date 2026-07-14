@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student & Admin Portal | Prathika IIT Academy</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Portal Custom Styles -->
+    <link rel="stylesheet" href="portal.css">
+</head>
+<body class="portal-body">
+
+    <!-- ==========================================
+         PORTAL LOGIN & REGISTRATION CONTAINER
+         ========================================== -->
+    <div class="login-wrapper" id="loginWrapper">
+        <div class="login-container">
+            <div class="login-brand">
+                <a href="index.html" class="brand-back-link">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Landing Page
+                </a>
+                <div class="brand-logo-container">
+                    <img src="images/logo.png" alt="Prathika IIT Academy Logo" class="brand-logo">
+                </div>
+                <h2>Academy Portal</h2>
+                <p>Concept Clarity + Success Through Discipline</p>
+            </div>
+
+            <!-- Toggle Role Selector -->
+            <div class="role-selector">
+                <button class="role-btn active" id="btnStudentRole" onclick="switchLoginRole('student')">
+                    <i class="fa-solid fa-user-graduate"></i> Student
+                </button>
+                <button class="role-btn" id="btnAdminRole" onclick="switchLoginRole('admin')">
+                    <i class="fa-solid fa-user-shield"></i> Admin
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Username / ID</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="loginUsername" required placeholder="Enter username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="loginPassword" required placeholder="Enter password">
+                    </div>
+                </div>
+
+                <div id="loginErrorMessage" class="error-message"></div>
+
+                <button type="submit" class="btn btn-gold btn-block btn-login">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard
+                </button>
+
+                <!-- Help Info for default accounts -->
+                <div class="login-credentials-tip" id="credentialsTip">
+                    <p><strong>Demo Accounts:</strong></p>
+                    <p id="tipText">Student: <code>student</code> / Password: <code>student123</code></p>
+                </div>
+
+                <!-- Registration Toggle Link (Only for students) -->
+                <div class="register-prompt" id="registerPrompt">
+                    New Student? <a href="#" id="toggleRegisterLink">Create an Account</a>
+                </div>
+            </form>
+
+            <!-- Registration Form (Hidden by default) -->
+            <form class="login-form hidden" id="registerForm">
+                <div class="form-group">
+                    <label for="regFullName">Full Name *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="regFullName" required placeholder="Student's name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regClass">Class/Standard *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <select id="regClass" required>
+                            <option value="" disabled selected>Select Class</option>
+                            <option value="Class 6">Class 6 (IIT Foundation)</option>
+                            <option value="Class 7">Class 7 (IIT Foundation)</option>
+                            <option value="Class 8">Class 8 (IIT Foundation)</option>
+                            <option value="Class 9">Class 9 (IIT Foundation)</option>
+                            <option value="Class 10">Class 10 (IIT Foundation)</option>
+                            <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                            <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regUsername">Username *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-at"></i>
+                        <input type="text" id="regUsername" required placeholder="Choose unique username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Password *</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="regPassword" required placeholder="Choose password">
+                    </div>
+                </div>
+
+                <div id="regErrorMessage" class="error-message"></div>
+                <div id="regSuccessMessage" class="success-message"></div>
+
+                <button type="submit" class="btn btn-gold btn-block btn-login">
+                    <i class="fa-solid fa-user-plus"></i> Register & Create Account
+                </button>
+
+                <div class="register-prompt">
+                    Already have an account? <a href="#" id="toggleLoginLink">Sign In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         MAIN ADMIN PORTAL PANEL LAYOUT
+         ========================================== -->
+    <div class="portal-container hidden" id="adminPortal">
+        <!-- Sidebar Navigation -->
+        <aside class="portal-sidebar">
+            <div class="sidebar-header">
+                <img src="images/logo.png" alt="Logo" class="sidebar-logo">
+                <div>
+                    <h4>Prathika Academy</h4>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-target="admin-overview" onclick="switchDashboardTab('admin', 'admin-overview')">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard Overview
+                </a>
+                <a href="#" class="menu-item" data-target="admin-inquiries" onclick="switchDashboardTab('admin', 'admin-inquiries')">
+                    <i class="fa-solid fa-user-tag"></i> Inquiries Manager
+                    <span class="badge badge-gold" id="inqCountBadge">0</span>
+                </a>
+                <a href="#" class="menu-item" data-target="admin-tests" onclick="switchDashboardTab('admin', 'admin-tests')">
+                    <i class="fa-solid fa-file-signature"></i> Mock Test Scheduler
+                </a>
+                <a href="#" class="menu-item" data-target="admin-announcements" onclick="switchDashboardTab('admin', 'admin-announcements')">
+                    <i class="fa-solid fa-bullhorn"></i> Announcements
+                </a>
+                <a href="#" class="menu-item" data-target="admin-study" onclick="switchDashboardTab('admin', 'admin-study')">
+                    <i class="fa-solid fa-book-open"></i> Study Library
+                </a>
+                <a href="#" class="menu-item" data-target="admin-doubts" onclick="switchDashboardTab('admin', 'admin-doubts')">
+                    <i class="fa-solid fa-circle-question"></i> Doubts Solver
+                    <span class="badge badge-orange" id="doubtsCountBadge">0</span>
+                </a>
+                
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <i class="fa-solid fa-user-shield avatar-icon"></i>
+                        <div>
+                            <h5>Sirisha Teacher</h5>
+                            <span>Principal & Director</span>
+                        </div>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard Viewport -->
+        <main class="portal-main">
+            <header class="main-header">
+                <h2>Welcome Back, Sirisha</h2>
+                <span class="current-date" id="adminCurrentDate">July 13, 2026</span>
+            </header>
+
+            <!-- Tab 1: Overview Dashboard -->
+            <section class="tab-panel active" id="admin-overview">
+                <div class="overview-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue"><i class="fa-solid fa-user-tag"></i></div>
+                        <div class="stat-content">
+                            <h3>Total Inquiries</h3>
+                            <p id="statTotalInqs">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-yellow"><i class="fa-solid fa-clock"></i></div>
+                        <div class="stat-content">
+                            <h3>Pending Inquiries</h3>
+                            <p id="statPendingInqs">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple"><i class="fa-solid fa-file-signature"></i></div>
+                        <div class="stat-content">
+                            <h3>Scheduled Mock Tests</h3>
+                            <p id="statMockTests">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-orange"><i class="fa-solid fa-circle-question"></i></div>
+                        <div class="stat-content">
+                            <h3>Unresolved Doubts</h3>
+                            <p id="statUnresolvedDoubts">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Tables in Overview -->
+                <div class="activity-row">
+                    <div class="dashboard-table-card">
+                        <div class="card-header">
+                            <h4>Recent Admission Inquiries</h4>
+                            <button class="btn btn-sm btn-outline-gold" onclick="switchDashboardTab('admin', 'admin-inquiries')">View All</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Phone</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overviewInquiriesTable">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Inquiries Manager -->
+            <section class="tab-panel" id="admin-inquiries">
+                <div class="dashboard-table-card">
+                    <div class="card-header border-bottom">
+                        <h4>Admission Leads Manager</h4>
+                        <div class="search-filter-box">
+                            <input type="text" id="inqSearchInput" onkeyup="filterInquiriesTable()" placeholder="Search student or class...">
+                            <select id="inqFilterSelect" onchange="filterInquiriesTable()">
+                                <option value="All">All Inquiries</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Enrolled">Enrolled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="fullInquiriesTable">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Parent Name</th>
+                                    <th>Target Class</th>
+                                    <th>Target Exam</th>
+                                    <th>Mobile Phone</th>
+                                    <th>Date Received</th>
+                                    <th>Status Action</th>
+                                    <th>Message / Notes</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminInquiriesList">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: Mock Test Scheduler -->
+            <section class="tab-panel" id="admin-tests">
+                <div class="split-layout">
+                    <!-- Column Left: Form -->
+                    <div class="form-card">
+                        <h4>Create Mock Test Syllabus</h4>
+                        <form id="scheduleTestForm" class="dashboard-form">
+                            <div class="form-group">
+                                <label for="testSubject">Subject *</label>
+                                <select id="testSubject" required>
+                                    <option value="" disabled selected>Select Subject</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="IIT Foundation Complete">IIT Foundation (Complete Pack)</option>
+                                    <option value="Mock Board Paper">Mock Board Exam</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="testSyllabus">Syllabus / Topics covered *</label>
+                                <textarea id="testSyllabus" required rows="3" placeholder="E.g., Trigonometry equations, Organic Carbon chains, Electrostatics basics"></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="testDate">Date *</label>
+                                    <input type="date" id="testDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="testTime">Time *</label>
+                                    <input type="time" id="testTime" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-block">
+                                <i class="fa-solid fa-calendar-plus"></i> Schedule Test
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column Right: List of Tests -->
+                    <div class="dashboard-table-card">
+                        <h4>Scheduled Mock Exams Calendar</h4>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Date & Time</th>
+                                        <th>Syllabus Details</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminTestsList">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: Announcements Board -->
+            <section class="tab-panel" id="admin-announcements">
+                <div class="split-layout">
+                    <!-- Column Left: Form -->
+                    <div class="form-card">
+                        <h4>Publish Announcement</h4>
+                        <form id="postAnnouncementForm" class="dashboard-form">
+                            <div class="form-group">
+                                <label for="annTitle">Heading *</label>
+                                <input type="text" id="annTitle" required placeholder="E.g., Special Batch Timings, Exam Postponed">
+                            </div>
+                            <div class="form-group">
+                                <label for="annContent">Message Description *</label>
+                                <textarea id="annContent" required rows="4" placeholder="Write announcement details here..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="annTag">Urgency Tag</label>
+                                <select id="annTag">
+                                    <option value="General" selected>General Info</option>
+                                    <option value="Important">Important Alert</option>
+                                    <option value="Urgent">Urgent - Must Read</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-block">
+                                <i class="fa-solid fa-bullhorn"></i> Publish Notice
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column Right: List of Announcements -->
+                    <div class="list-display-card">
+                        <h4>Active Notice Board</h4>
+                        <div id="adminAnnouncementsList" class="announcements-timeline">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 5: Study Library Manager -->
+            <section class="tab-panel" id="admin-study">
+                <div class="split-layout">
+                    <!-- Column Left: Form -->
+                    <div class="form-card">
+                        <h4>Upload Study Notes/Link</h4>
+                        <form id="addStudyForm" class="dashboard-form">
+                            <div class="form-group">
+                                <label for="studyTitle">Material Name *</label>
+                                <input type="text" id="studyTitle" required placeholder="E.g., Trigonometry Formula Cheat Sheet">
+                            </div>
+                            <div class="form-group">
+                                <label for="studySubject">Subject *</label>
+                                <select id="studySubject" required>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="General Material">General Resource</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="studyUrl">Resource URL / Google Drive link *</label>
+                                <input type="url" id="studyUrl" required placeholder="https://drive.google.com/..." value="https://drive.google.com/">
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-block">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Share Material
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column Right: List of Materials -->
+                    <div class="dashboard-table-card">
+                        <h4>Curated Student Notes Library</h4>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Material Title</th>
+                                        <th>Subject</th>
+                                        <th>Access Link</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminStudyList">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 6: Doubts Resolver -->
+            <section class="tab-panel" id="admin-doubts">
+                <div class="dashboard-table-card">
+                    <h4>Student Doubts Desk</h4>
+                    <p class="section-subtitle">Answer academic questions submitted by your students.</p>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Subject</th>
+                                    <th>Question Details</th>
+                                    <th>Status</th>
+                                    <th>Response Given</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDoubtsList">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+
+    <!-- ==========================================
+         MAIN STUDENT PORTAL PANEL LAYOUT
+         ========================================== -->
+    <div class="portal-container hidden" id="studentPortal">
+        <!-- Sidebar Navigation -->
+        <aside class="portal-sidebar">
+            <div class="sidebar-header">
+                <img src="images/logo.png" alt="Logo" class="sidebar-logo">
+                <div>
+                    <h4>Prathika Academy</h4>
+                    <span>Student Panel</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-target="student-courses" onclick="switchDashboardTab('student', 'student-courses')">
+                    <i class="fa-solid fa-calendar-check"></i> Course & Exams
+                </a>
+                <a href="#" class="menu-item" data-target="student-study" onclick="switchDashboardTab('student', 'student-study')">
+                    <i class="fa-solid fa-book-open"></i> Notes Library
+                </a>
+                <a href="#" class="menu-item" data-target="student-announcements" onclick="switchDashboardTab('student', 'student-announcements')">
+                    <i class="fa-solid fa-bullhorn"></i> Announcements
+                </a>
+                <a href="#" class="menu-item" data-target="student-doubts" onclick="switchDashboardTab('student', 'student-doubts')">
+                    <i class="fa-solid fa-circle-question"></i> Ask a Doubt
+                </a>
+                
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <i class="fa-solid fa-user-graduate avatar-icon"></i>
+                        <div>
+                            <h5 id="studentProfileName">Student Name</h5>
+                            <span id="studentProfileClass">Class 9 (IIT)</span>
+                        </div>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Dashboard Viewport -->
+        <main class="portal-main">
+            <header class="main-header">
+                <h2>Welcome, <span id="studentWelcomeName">Student</span></h2>
+                <span class="current-date" id="studentCurrentDate">July 13, 2026</span>
+            </header>
+
+            <!-- Tab 1: Course & Scheduled Mock Exams -->
+            <section class="tab-panel active" id="student-courses">
+                <!-- Enrollment Details Callout -->
+                <div class="enrollment-hero">
+                    <div class="enrollment-details">
+                        <span class="hero-tag">Enrolled Batch</span>
+                        <h3 id="studentHeroClass">IIT Foundation (Class 9 Core)</h3>
+                        <p><i class="fa-solid fa-clock"></i> Offline Batches: Mon to Sat | 4:30 PM - 7:30 PM</p>
+                        <p><i class="fa-solid fa-circle-check"></i> Location: Alwal Campus, Secunderabad</p>
+                    </div>
+                    <div class="enrollment-status-badge">
+                        <i class="fa-solid fa-shield-halved"></i> Active Enrollment
+                    </div>
+                </div>
+
+                <!-- Test Schedules Calendar -->
+                <div class="dashboard-table-card margin-top-large">
+                    <div class="card-header">
+                        <h4>Upcoming Mock Tests Calendar</h4>
+                        <span>Syllabus published by Sirisha Teacher</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Date & Time</th>
+                                    <th>Topics Covered (Syllabus)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTestsList">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Study Materials Library -->
+            <section class="tab-panel" id="student-study">
+                <div class="dashboard-table-card">
+                    <div class="card-header border-bottom">
+                        <h4>Academic Reference Library</h4>
+                        <span>Download formulae cheat sheets and conceptual syllabus notes</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Resource Title</th>
+                                    <th>Subject</th>
+                                    <th>Link Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentStudyList">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: Announcements Feed -->
+            <section class="tab-panel" id="student-announcements">
+                <div class="list-display-card full-width">
+                    <h4>Principal's Notice Board</h4>
+                    <p class="section-subtitle">Official announcements from Sirisha Teacher for Prathika Academy students.</p>
+                    <div id="studentAnnouncementsList" class="announcements-timeline timeline-student">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: Ask a Doubt Desk -->
+            <section class="tab-panel" id="student-doubts">
+                <div class="split-layout">
+                    <!-- Column Left: Form -->
+                    <div class="form-card">
+                        <h4>Submit an Academic Doubt</h4>
+                        <p class="form-desc">Write down where you are struggling. Sirisha Teacher will answer your doubt directly.</p>
+                        <form id="askDoubtForm" class="dashboard-form">
+                            <div class="form-group">
+                                <label for="doubtSubject">Subject *</label>
+                                <select id="doubtSubject" required>
+                                    <option value="" disabled selected>Select Subject</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="doubtQuestion">Your Question / Doubt Details *</label>
+                                <textarea id="doubtQuestion" required rows="5" placeholder="E.g., I'm confused about why carbon forms a triple covalent bond with Nitrogen in cyanides. What is the hybridization state?"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-gold btn-block">
+                                <i class="fa-solid fa-paper-plane"></i> Send Doubt to Teacher
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Column Right: History of Doubts -->
+                    <div class="dashboard-table-card">
+                        <h4>Academic Query History</h4>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Your Question</th>
+                                        <th>Status</th>
+                                        <th>Teacher's Response</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentDoubtsList">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Doubt Reply Modal (Used in Admin Dashboard) -->
+    <div class="modal-backdrop hidden" id="replyDoubtModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h4>Respond to Student Doubt</h4>
+                <button class="modal-close" onclick="closeDoubtModal()">&times;</button>
+            </div>
+            <form id="replyDoubtForm" class="dashboard-form">
+                <input type="hidden" id="replyDoubtId">
+                <div class="form-group">
+                    <label>Student's Doubt:</label>
+                    <div class="quote-display" id="replyDoubtQuestionText"></div>
+                </div>
+                <div class="form-group">
+                    <label for="teacherReplyText">Write your Response / Explanation *</label>
+                    <textarea id="teacherReplyText" required rows="6" placeholder="Provide step-by-step concept clarity explanation here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-gold btn-block">
+                    <i class="fa-solid fa-comment-medical"></i> Save and Resolve Doubt
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Portal Script -->
+    <script src="portal.js"></script>
+</body>
+</html>
