@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Portal Custom Styles -->
     <link rel="stylesheet" href="portal.css">
+    <!-- Google Identity Services (GIS) library -->
+    <script src="https://accounts.google.com/gsi/client" onload="initGoogleSignIn()" async defer></script>
 </head>
 <body class="portal-body">
 
@@ -73,6 +75,11 @@
                 <div class="register-prompt" id="registerPrompt">
                     New Student? <a href="#" id="toggleRegisterLink">Create an Account</a>
                 </div>
+
+                <div class="divider-or" id="googleDivider">
+                    <span>OR</span>
+                </div>
+                <div id="googleSignInButton" class="google-signin-btn-container"></div>
             </form>
 
             <!-- Registration Form (Hidden by default) -->

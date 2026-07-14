@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const { OAuth2Client } = require('google-auth-library');
 
 // Load environment variables
 dotenv.config();
@@ -10,6 +11,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;
+
+// Initialize Google OAuth2 client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Middleware
 app.use(cors());
@@ -216,6 +220,93 @@ async function seedDatabase() {
 // ==========================================
 // API ENDPOINTS
 // ==========================================
+
+// Config Endpoint
+app.get('/api/config', (req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+  });
+});
+
+// Helper function to decode JWT payload without signature verification (Developer Fallback)
+function decodeJwtWithoutVerification(token) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = Buffer.from(parts[1], 'base64').toString('utf-8');
+    return JSON.parse(payload);
+  } catch (e) {
+    return null;
+  }
+}
+
+// Google Auth Endpoint
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ error: 'ID Token is required' });
+    }
+
+    let payload;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+
+    if (clientId) {
+      // Enforce secure verification if GOOGLE_CLIENT_ID is set
+      try {
+        const ticket = await googleClient.verifyIdToken({
+          idToken,
+          audience: clientId,
+        });
+        payload = ticket.getPayload();
+      } catch (verifyErr) {
+        console.error('Error verifying Google Token:', verifyErr);
+        return res.status(401).json({ error: 'Invalid Google Token signature' });
+      }
+    } else {
+      // Fallback for development/testing when Client ID is not configured in .env
+      console.warn('[WARNING] GOOGLE_CLIENT_ID is not set in .env. Skipping token signature verification (Dev Mode).');
+      payload = decodeJwtWithoutVerification(idToken);
+      if (!payload) {
+        return res.status(400).json({ error: 'Failed to parse Google ID Token' });
+      }
+    }
+
+    // Extract user info
+    const { email, name, sub } = payload;
+    if (!email) {
+      return res.status(400).json({ error: 'Email not found in Google Token payload' });
+    }
+
+    // Check if user exists in db
+    let user = await User.findOne({ username: email.toLowerCase() });
+
+    if (!user) {
+      // Automatically register as a student
+      console.log(`Automatically registering new student from Google login: ${name} (${email})`);
+      user = new User({
+        username: email.toLowerCase(),
+        password: 'google-oauth-managed-' + sub, // random/dummy password
+        fullName: name || 'Google User',
+        class: 'Unassigned',
+        role: 'student'
+      });
+      await user.save();
+    }
+
+    // Log in
+    res.json({
+      username: user.username,
+      fullName: user.fullName,
+      class: user.class,
+      role: user.role
+    });
+
+  } catch (error) {
+    console.error('Error in /api/auth/google:', error);
+    res.status(500).json({ error: 'Google login failed due to a server error' });
+  }
+});
 
 // 1. Authentication
 app.post('/api/auth/login', async (req, res) => {

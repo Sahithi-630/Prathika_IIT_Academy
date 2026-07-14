@@ -43,6 +43,8 @@ function switchLoginRole(role) {
     const credentialsTip = document.getElementById('credentialsTip');
     const tipText = document.getElementById('tipText');
     const loginError = document.getElementById('loginErrorMessage');
+    const googleBtn = document.getElementById('googleSignInButton');
+    const googleDiv = document.getElementById('googleDivider');
 
     loginError.style.display = 'none';
 
@@ -52,12 +54,16 @@ function switchLoginRole(role) {
         registerPrompt.classList.remove('hidden');
         credentialsTip.classList.remove('hidden');
         tipText.innerHTML = `Student: <code>student</code> / Password: <code>student123</code>`;
+        if (googleBtn) googleBtn.classList.remove('hidden');
+        if (googleDiv) googleDiv.classList.remove('hidden');
     } else {
         btnStudent.classList.remove('active');
         btnAdmin.classList.add('active');
         registerPrompt.classList.add('hidden');
         credentialsTip.classList.remove('hidden');
         tipText.innerHTML = `Admin: <code>admin</code> / Password: <code>admin123</code>`;
+        if (googleBtn) googleBtn.classList.add('hidden');
+        if (googleDiv) googleDiv.classList.add('hidden');
     }
 }
 
@@ -874,3 +880,82 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+// ==========================================
+// 6. GOOGLE SIGN-IN INTEGRATION
+// ==========================================
+let googleInitialized = false;
+
+window.initGoogleSignIn = function() {
+    if (googleInitialized) return;
+    if (typeof google === 'undefined') return;
+    
+    googleInitialized = true;
+    
+    fetch('/api/config')
+        .then(res => res.json())
+        .then(config => {
+            const clientId = config.googleClientId || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+            
+            google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleGoogleSignIn
+            });
+            
+            const btnContainer = document.getElementById('googleSignInButton');
+            if (btnContainer) {
+                google.accounts.id.renderButton(
+                    btnContainer,
+                    { theme: 'outline', size: 'large', width: 380, logo_alignment: 'left' }
+                );
+            }
+        })
+        .catch(err => {
+            console.error('Failed to load Google OAuth configuration:', err);
+            googleInitialized = false; // allow retry
+        });
+};
+
+function handleGoogleSignIn(response) {
+    const loginError = document.getElementById('loginErrorMessage');
+    if (loginError) loginError.style.display = 'none';
+
+    fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(data => { throw new Error(data.error || 'Google login failed') });
+        }
+        return res.json();
+    })
+    .then(matchedUser => {
+        if (matchedUser.role !== 'student') {
+            if (loginError) {
+                loginError.style.display = 'block';
+                loginError.textContent = `Access denied. Google login is only for students.`;
+            }
+            return;
+        }
+
+        // Successful login
+        loggedInUser = matchedUser;
+        document.getElementById('loginWrapper').classList.add('hidden');
+        
+        // Reset login form
+        const formLogin = document.getElementById('loginForm');
+        if (formLogin) formLogin.reset();
+
+        // Open student dashboard
+        openStudentDashboard(matchedUser);
+    })
+    .catch(err => {
+        if (loginError) {
+            loginError.style.display = 'block';
+            loginError.textContent = err.message || `Google Sign-in failed. Please try username/password.`;
+        }
+    });
+}
+

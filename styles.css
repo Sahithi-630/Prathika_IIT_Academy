@@ -1995,3 +1995,95 @@ ul {
 .ig-grid-item:hover .ig-grid-overlay {
     opacity: 1 !important;
 }
+
+/* Inner Page Header Banner */
+.inner-banner {
+    position: relative;
+    padding-top: calc(var(--header-height) + 40px);
+    padding-bottom: 60px;
+    background-color: var(--clr-navy-dark);
+    background: radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 15% 85%, rgba(21, 48, 91, 0.4) 0%, transparent 55%),
+                var(--clr-navy-dark);
+    color: var(--clr-text-light);
+    text-align: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+.inner-banner h1 {
+    font-size: 2.8rem;
+    color: var(--clr-gold-light);
+    margin-bottom: 10px;
+    font-family: var(--ff-headings);
+    font-weight: 700;
+}
+.inner-banner p {
+    font-size: 1.1rem;
+    color: var(--clr-text-muted);
+}
+
+/* Programs Teaser Grid Styles */
+.programs-teaser-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+.program-teaser-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--border-radius-md);
+    padding: 30px;
+    transition: var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.program-teaser-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--clr-gold-accent);
+    box-shadow: var(--shadow-gold-glow);
+}
+.program-teaser-card .card-icon {
+    font-size: 2.2rem;
+    color: var(--clr-gold-accent);
+    margin-bottom: 20px;
+}
+.program-teaser-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--clr-text-light);
+    margin-bottom: 5px;
+}
+.program-teaser-card .card-subtitle {
+    font-size: 0.85rem;
+    color: var(--clr-gold-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+.program-teaser-card .card-desc {
+    font-size: 0.95rem;
+    color: var(--clr-text-slate);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+.program-teaser-card .link-gold {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--clr-gold-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+}
+.program-teaser-card .link-gold i {
+    transition: var(--transition-fast);
+}
+.program-teaser-card .link-gold:hover i {
+    transform: translateX(4px);
+}
+

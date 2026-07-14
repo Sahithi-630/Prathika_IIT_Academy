@@ -84,64 +84,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const dots = document.querySelectorAll('.dot');
     const prevBtn = document.getElementById('prevSlide');
     const nextBtn = document.getElementById('nextSlide');
-    let currentSlide = 0;
-    let autoSlideInterval;
     
-    const showSlide = (index) => {
-        // Handle boundary conditions
-        if (index >= slides.length) currentSlide = 0;
-        else if (index < 0) currentSlide = slides.length - 1;
-        else currentSlide = index;
+    if (slides.length > 0 && prevBtn && nextBtn) {
+        let currentSlide = 0;
+        let autoSlideInterval;
         
-        // Remove active class from all slides and dots
-        slides.forEach(slide => slide.classList.remove('active'));
-        dots.forEach(dot => dot.classList.remove('active'));
+        const showSlide = (index) => {
+            // Handle boundary conditions
+            if (index >= slides.length) currentSlide = 0;
+            else if (index < 0) currentSlide = slides.length - 1;
+            else currentSlide = index;
+            
+            // Remove active class from all slides and dots
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            // Activate target slide and dot
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        };
         
-        // Activate target slide and dot
-        slides[currentSlide].classList.add('active');
-        dots[currentSlide].classList.add('active');
-    };
-    
-    const startAutoSlide = () => {
-        stopAutoSlide(); // clear existing if any
-        autoSlideInterval = setInterval(() => {
+        const startAutoSlide = () => {
+            stopAutoSlide(); // clear existing if any
+            autoSlideInterval = setInterval(() => {
+                showSlide(currentSlide + 1);
+            }, 6000); // 6 seconds per slide
+        };
+        
+        const stopAutoSlide = () => {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+            }
+        };
+        
+        // Slide Navigation click events
+        nextBtn.addEventListener('click', () => {
             showSlide(currentSlide + 1);
-        }, 6000); // 6 seconds per slide
-    };
-    
-    const stopAutoSlide = () => {
-        if (autoSlideInterval) {
-            clearInterval(autoSlideInterval);
-        }
-    };
-    
-    // Slide Navigation click events
-    nextBtn.addEventListener('click', () => {
-        showSlide(currentSlide + 1);
-        startAutoSlide(); // Reset timer on manual click
-    });
-    
-    prevBtn.addEventListener('click', () => {
-        showSlide(currentSlide - 1);
-        startAutoSlide(); // Reset timer on manual click
-    });
-    
-    // Dot click events
-    dots.forEach(dot => {
-        dot.addEventListener('click', () => {
-            const slideIndex = parseInt(dot.getAttribute('data-slide'));
-            showSlide(slideIndex);
             startAutoSlide(); // Reset timer on manual click
         });
-    });
-    
-    // Pause auto-sliding on hovering over slider to improve UX
-    const sliderContainer = document.querySelector('.testimonials-container');
-    sliderContainer.addEventListener('mouseenter', stopAutoSlide);
-    sliderContainer.addEventListener('mouseleave', startAutoSlide);
-    
-    // Initialise slider timer
-    startAutoSlide();
+        
+        prevBtn.addEventListener('click', () => {
+            showSlide(currentSlide - 1);
+            startAutoSlide(); // Reset timer on manual click
+        });
+        
+        // Dot click events
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const slideIndex = parseInt(dot.getAttribute('data-slide'));
+                showSlide(slideIndex);
+                startAutoSlide(); // Reset timer on manual click
+            });
+        });
+        
+        // Pause auto-sliding on hovering over slider to improve UX
+        const sliderContainer = document.querySelector('.testimonials-container');
+        if (sliderContainer) {
+            sliderContainer.addEventListener('mouseenter', stopAutoSlide);
+            sliderContainer.addEventListener('mouseleave', startAutoSlide);
+        }
+        
+        // Initialise slider timer
+        startAutoSlide();
+    }
 
 
     /* ==========================================================================
@@ -172,95 +177,100 @@ document.addEventListener('DOMContentLoaded', () => {
     const formSuccessState = document.getElementById('formSuccessState');
     const resetFormBtn = document.getElementById('resetFormBtn');
     
-    inquiryForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // Prevent standard page reload
-        
-        // Retrieve inputs (useful for validation or eventual API integration)
-        const studentName = document.getElementById('studentName').value;
-        const parentName = document.getElementById('parentName').value;
-        const studentClass = document.getElementById('studentClass').value;
-        const targetExam = document.getElementById('targetExam').value;
-        const phoneNumber = document.getElementById('phoneNumber').value;
-        const message = document.getElementById('message').value;
-        
-        // POST to backend API
-        fetch('/api/inquiries', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                studentName,
-                parentName,
-                studentClass,
-                targetExam,
-                phoneNumber,
-                message
+    if (inquiryForm && formSuccessState && resetFormBtn) {
+        inquiryForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent standard page reload
+            
+            // Retrieve inputs (useful for validation or eventual API integration)
+            const studentName = document.getElementById('studentName').value;
+            const parentName = document.getElementById('parentName').value;
+            const studentClass = document.getElementById('studentClass').value;
+            const targetExam = document.getElementById('targetExam').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const message = document.getElementById('message').value;
+            
+            // POST to backend API
+            fetch('/api/inquiries', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    studentName,
+                    parentName,
+                    studentClass,
+                    targetExam,
+                    phoneNumber,
+                    message
+                })
             })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Inquiry Captured in database:', data);
-        })
-        .catch(err => {
-            console.error('Error saving inquiry:', err);
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Inquiry Captured in database:', data);
+            })
+            .catch(err => {
+                console.error('Error saving inquiry:', err);
+            });
+            
+            // Elegant animation transitions to success state
+            inquiryForm.style.opacity = '0';
+            
+            setTimeout(() => {
+                inquiryForm.style.display = 'none';
+                formSuccessState.style.display = 'flex';
+                
+                // Smooth scroll up to contact card header if needed
+                const contactColumn = document.querySelector('.contact-form-column');
+                if (contactColumn) {
+                    contactColumn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 300);
         });
         
-        // Elegant animation transitions to success state
-        inquiryForm.style.opacity = '0';
-        
-        setTimeout(() => {
-            inquiryForm.style.display = 'none';
-            formSuccessState.style.display = 'flex';
+        // Reset Form button action
+        resetFormBtn.addEventListener('click', () => {
+            inquiryForm.reset();
             
-            // Smooth scroll up to contact card header if needed
-            document.querySelector('.contact-form-column').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 300);
-    });
-    
-    // Reset Form button action
-    resetFormBtn.addEventListener('click', () => {
-        inquiryForm.reset();
-        
-        formSuccessState.style.display = 'none';
-        inquiryForm.style.display = 'flex';
-        
-        setTimeout(() => {
-            inquiryForm.style.opacity = '1';
-        }, 50);
-    });
+            formSuccessState.style.display = 'none';
+            inquiryForm.style.display = 'flex';
+            
+            setTimeout(() => {
+                inquiryForm.style.opacity = '1';
+            }, 50);
+        });
+    }
 
 
     /* ==========================================================================
        7. ACTIVE NAVIGATION LINK SWITCHER BASED ON SCROLL POSITION
        ========================================================================== */
-    const sections = document.querySelectorAll('section');
+    // const sections = document.querySelectorAll('section');
     
-    const activeNavLinkOnScroll = () => {
-        let currentSectionId = '';
+    // const activeNavLinkOnScroll = () => {
+    //     let currentSectionId = '';
         
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop - 120; // accounting for sticky header gap
-            const sectionHeight = section.clientHeight;
+    //     sections.forEach(section => {
+    //         const sectionTop = section.offsetTop - 120; // accounting for sticky header gap
+    //         const sectionHeight = section.clientHeight;
             
-            if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-                currentSectionId = section.getAttribute('id');
-            }
-        });
+    //         if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+    //             currentSectionId = section.getAttribute('id');
+    //         }
+    //     });
         
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${currentSectionId}`) {
-                link.classList.add('active');
-            }
-        });
-    };
+    //     navLinks.forEach(link => {
+    //         link.classList.remove('active');
+    //         if (link.getAttribute('href') === `#${currentSectionId}`) {
+    //             link.classList.add('active');
+    //         }
+    //     });
+    // };
     
-    window.addEventListener('scroll', activeNavLinkOnScroll);
-    activeNavLinkOnScroll();
+    // window.addEventListener('scroll', activeNavLinkOnScroll);
+    // activeNavLinkOnScroll();
 });

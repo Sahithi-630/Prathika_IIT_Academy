@@ -1116,3 +1116,32 @@ body.portal-body {
         margin-bottom: 20px;
     }
 }
+
+/* Google Sign-in styles */
+.divider-or {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 15px 0;
+    color: var(--color-text-gray);
+    font-size: 0.8rem;
+}
+.divider-or::before,
+.divider-or::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.divider-or:not(:empty)::before {
+    margin-right: .5em;
+}
+.divider-or:not(:empty)::after {
+    margin-left: .5em;
+}
+.google-signin-btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    width: 100%;
+}
+
