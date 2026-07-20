@@ -67,8 +67,11 @@ body {
     font-family: var(--ff-body);
     font-size: 1rem;
     line-height: 1.6;
-    color: var(--clr-text-dark);
-    background-color: var(--clr-bg-light);
+    color: var(--clr-text-light);
+    background-color: var(--clr-navy-dark);
+    background-image: radial-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 0),
+                      linear-gradient(to bottom, #0B192C, #060d17);
+    background-size: 40px 40px, 100% 100%;
     overflow-x: hidden;
 }
 
@@ -420,9 +423,11 @@ ul {
     display: flex;
     align-items: center;
     background-color: var(--clr-navy-dark);
-    background: radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
-                radial-gradient(circle at 15% 85%, rgba(21, 48, 91, 0.4) 0%, transparent 55%),
-                var(--clr-navy-dark);
+    background-image: linear-gradient(to right, rgba(11, 25, 44, 0.95) 35%, rgba(11, 25, 44, 0.7) 70%, rgba(11, 25, 44, 0.4) 100%),
+                      url('study_peace_background.png');
+    background-size: cover;
+    background-position: center right;
+    background-repeat: no-repeat;
     color: var(--clr-text-light);
     overflow: hidden;
 }
@@ -513,6 +518,7 @@ ul {
 
 /* Animated shape decoration */
 .hero-wave {
+    display: none;
     position: absolute;
     bottom: -1px;
     left: 0;
@@ -539,7 +545,7 @@ ul {
    -------------------------------------------------------------------------- */
 .about-section {
     padding: 100px 0;
-    background-color: var(--clr-bg-light);
+    background-color: transparent;
     position: relative;
 }
 
@@ -562,7 +568,7 @@ ul {
     font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 800;
     letter-spacing: -0.5px;
-    color: var(--clr-navy-dark);
+    color: var(--clr-text-light);
 }
 
 .title-underline {
@@ -679,13 +685,13 @@ ul {
 .about-subtitle {
     font-size: 1.6rem;
     font-weight: 700;
-    color: var(--clr-navy-mid);
+    color: var(--clr-text-light);
     margin-bottom: 20px;
 }
 
 .story-paragraph {
     font-size: 1rem;
-    color: #475569;
+    color: var(--clr-text-slate);
     margin-bottom: 20px;
     line-height: 1.7;
 }
@@ -693,11 +699,11 @@ ul {
 .highlight-lead {
     font-size: 1.15rem;
     font-weight: 600;
-    color: var(--clr-navy-dark);
+    color: var(--clr-text-light);
 }
 
 .story-quote-block {
-    background-color: rgba(21, 48, 91, 0.03);
+    background-color: rgba(255, 255, 255, 0.03);
     border-left: 4px solid var(--clr-gold);
     padding: 24px;
     border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
@@ -707,14 +713,14 @@ ul {
 .quote-text {
     font-size: 1.05rem;
     font-style: italic;
-    color: var(--clr-navy-mid);
+    color: var(--clr-text-light);
     line-height: 1.6;
     font-weight: 500;
 }
 
 .about-signature {
     margin-top: 30px;
-    border-top: 1px solid #E2E8F0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     padding-top: 20px;
 }
 
@@ -727,7 +733,7 @@ ul {
     font-family: var(--ff-headings);
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--clr-navy-dark);
+    color: var(--clr-text-light);
 }
 
 .sig-desc {
@@ -859,7 +865,7 @@ ul {
    -------------------------------------------------------------------------- */
 .courses-section {
     padding: 100px 0;
-    background-color: var(--clr-bg-light);
+    background-color: transparent;
 }
 
 .tabs-container {
@@ -872,7 +878,7 @@ ul {
     justify-content: center;
     gap: 12px;
     margin-bottom: 40px;
-    border-bottom: 1.5px solid #E2E8F0;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
     padding-bottom: 20px;
 }
 
@@ -895,20 +901,20 @@ ul {
 .tab-badge {
     font-size: 0.7rem;
     padding: 2px 8px;
-    background-color: #E2E8F0;
+    background-color: rgba(255, 255, 255, 0.08);
     border-radius: 50px;
-    color: var(--clr-text-dark);
+    color: var(--clr-text-light);
     font-weight: 700;
 }
 
 .tab-btn:hover {
-    color: var(--clr-navy-dark);
-    background-color: rgba(11, 25, 44, 0.03);
+    color: var(--clr-gold);
+    background-color: rgba(255, 255, 255, 0.03);
 }
 
 .tab-btn.active {
-    color: var(--clr-navy-dark);
-    background-color: rgba(212, 175, 55, 0.12);
+    color: var(--clr-gold-light);
+    background-color: rgba(212, 175, 55, 0.15);
     box-shadow: inset 0 -2px 0 var(--clr-gold);
 }
 
@@ -936,11 +942,11 @@ ul {
     grid-template-columns: 1.2fr 1fr;
     gap: 50px;
     align-items: center;
-    background-color: var(--clr-bg-card-light);
+    background-color: var(--clr-navy-mid);
     padding: 50px;
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: var(--shadow-dark);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .panel-badge {
@@ -957,11 +963,12 @@ ul {
 .tab-panel h3 {
     font-size: 2rem;
     margin-bottom: 18px;
+    color: var(--clr-text-light);
 }
 
 .panel-desc {
     font-size: 1.05rem;
-    color: #475569;
+    color: var(--clr-text-slate);
     margin-bottom: 30px;
     line-height: 1.6;
 }
@@ -978,7 +985,7 @@ ul {
     align-items: flex-start;
     gap: 12px;
     font-size: 0.98rem;
-    color: #334155;
+    color: var(--clr-text-light);
 }
 
 .panel-features li i {
@@ -1352,7 +1359,7 @@ ul {
    -------------------------------------------------------------------------- */
 .testimonials-section {
     padding: 100px 0;
-    background-color: var(--clr-bg-light);
+    background-color: transparent;
 }
 
 .testimonials-container {
@@ -1362,10 +1369,10 @@ ul {
 }
 
 .testimonial-slider {
-    background-color: var(--clr-bg-card-light);
+    background-color: var(--clr-navy-mid);
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(0, 0, 0, 0.03);
+    box-shadow: var(--shadow-dark);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     min-height: 300px;
     position: relative;
     overflow: hidden;
@@ -1404,7 +1411,7 @@ ul {
 .review-text {
     font-size: 1.15rem;
     font-style: italic;
-    color: var(--clr-navy-mid);
+    color: var(--clr-text-light);
     line-height: 1.7;
     margin-bottom: 30px;
     font-weight: 500;
@@ -1420,12 +1427,12 @@ ul {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: rgba(21, 48, 91, 0.08);
+    background-color: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.3rem;
-    color: var(--clr-navy-dark);
+    color: var(--clr-gold);
     border: 1.5px solid var(--clr-gold);
 }
 
@@ -1433,7 +1440,7 @@ ul {
     font-family: var(--ff-headings);
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--clr-navy-dark);
+    color: var(--clr-text-light);
 }
 
 .reviewer-status {
@@ -1455,22 +1462,22 @@ ul {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background-color: var(--clr-bg-card-light);
-    border: 1.5px solid #E2E8F0;
-    color: var(--clr-navy-dark);
+    background-color: var(--clr-navy-mid);
+    border: 1.5px solid rgba(255, 255, 255, 0.10);
+    color: var(--clr-text-light);
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: var(--transition-fast);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-dark);
 }
 
 .slider-btn:hover {
-    background-color: var(--clr-navy-dark);
-    color: var(--clr-text-light);
-    border-color: var(--clr-navy-dark);
+    background-color: var(--clr-gold);
+    color: var(--clr-navy-dark);
+    border-color: var(--clr-gold);
 }
 
 .slider-dots {
@@ -1482,7 +1489,7 @@ ul {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #CBD5E1;
+    background-color: rgba(255, 255, 255, 0.2);
     cursor: pointer;
     transition: var(--transition-fast);
 }

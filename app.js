@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalFetch = window.fetch;
     window.fetch = function(input, init) {
         if (typeof input === 'string' && input.startsWith('/api/')) {
-            if (window.location.protocol === 'file:' || !window.location.port || window.location.port !== '3000') {
+            const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const isFileProtocol = window.location.protocol === 'file:';
+            if (isFileProtocol || (isLocalHost && window.location.port !== '3000')) {
                 input = `http://localhost:3000${input}`;
             }
         }
@@ -192,14 +194,36 @@ document.addEventListener('DOMContentLoaded', () => {
         inquiryForm.addEventListener('submit', (e) => {
             e.preventDefault(); // Prevent standard page reload
             
-            // Retrieve inputs (useful for validation or eventual API integration)
-            const studentName = document.getElementById('studentName').value;
-            const parentName = document.getElementById('parentName').value;
+            // Retrieve inputs
+            const studentName = document.getElementById('studentName').value.trim();
+            const parentName = document.getElementById('parentName').value.trim();
             const studentClass = document.getElementById('studentClass').value;
             const targetExam = document.getElementById('targetExam').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            const message = document.getElementById('message').value;
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const message = document.getElementById('message').value.trim();
             
+            // WhatsApp Direct Messaging Trigger
+            const adminPhone = '919618955830';
+            const textMsg = `*New Admission Enquiry - Prathika IIT Academy*\n\n` +
+                            `👤 *Student Name:* ${studentName}\n` +
+                            `👥 *Parent Name:* ${parentName || 'N/A'}\n` +
+                            `🎓 *Class/Standard:* ${studentClass}\n` +
+                            `🎯 *Target Exam:* ${targetExam || 'N/A'}\n` +
+                            `📞 *Phone Number:* ${phoneNumber}\n` +
+                            `💬 *Message:* ${message || 'N/A'}`;
+            
+            const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(textMsg)}`;
+            
+            // Setup fallback click button on success card
+            const whatsappDirectBtn = document.getElementById('whatsappDirectBtn');
+            if (whatsappDirectBtn) {
+                whatsappDirectBtn.href = whatsappUrl;
+                whatsappDirectBtn.style.display = 'flex';
+            }
+            
+            // Try to open WhatsApp automatically in a new tab
+            window.open(whatsappUrl, '_blank');
+
             // POST to backend API
             fetch('/api/inquiries', {
                 method: 'POST',
@@ -247,6 +271,12 @@ document.addEventListener('DOMContentLoaded', () => {
         resetFormBtn.addEventListener('click', () => {
             inquiryForm.reset();
             
+            const whatsappDirectBtn = document.getElementById('whatsappDirectBtn');
+            if (whatsappDirectBtn) {
+                whatsappDirectBtn.style.display = 'none';
+                whatsappDirectBtn.href = '#';
+            }
+
             formSuccessState.style.display = 'none';
             inquiryForm.style.display = 'flex';
             

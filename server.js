@@ -38,7 +38,10 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   fullName: { type: String, required: true },
   class: { type: String },
-  role: { type: String, required: true, enum: ['student', 'admin'] }
+  role: { type: String, required: true, enum: ['student', 'admin'] },
+  studyMode: { type: String, default: 'Offline' },
+  batchTimings: { type: String, default: 'Mon to Sat | 4:30 PM - 7:30 PM' },
+  campusLocation: { type: String, default: 'Alwal Campus, Secunderabad' }
 });
 const User = mongoose.model('User', userSchema);
 
@@ -103,123 +106,14 @@ async function seedDatabase() {
   try {
     const userCount = await User.countDocuments();
     if (userCount === 0) {
-      console.log('Database empty. Seeding initial data...');
+      console.log('Database empty. Seeding admin account...');
 
-      // Seed Users
+      // Seed only the primary admin user
       const defaultUsers = [
-        { username: 'student', password: 'student123', fullName: 'Sandeep Goud', class: 'Intermediate 2nd Year', role: 'student' },
         { username: 'admin', password: 'admin123', fullName: 'Sirisha Teacher', role: 'admin' }
       ];
       await User.insertMany(defaultUsers);
-      console.log('Seeded users.');
-
-      // Seed Mock Tests
-      const defaultTests = [
-        {
-          subject: 'Chemistry',
-          dateTime: '2026-07-19T10:00',
-          syllabus: 'Organic Carbon Compounds & Nomenclature basics (Class 9 Core)'
-        },
-        {
-          subject: 'Mathematics',
-          dateTime: '2026-07-22T14:00',
-          syllabus: 'Quadratic Equations & Roots derivation formula mock practice'
-        },
-        {
-          subject: 'Physics',
-          dateTime: '2026-07-26T09:30',
-          syllabus: 'Newton Laws of Motion, Friction coefficient exercises & Free Body diagrams'
-        }
-      ];
-      await MockTest.insertMany(defaultTests);
-      console.log('Seeded mock tests.');
-
-      // Seed Announcements
-      const defaultAnnouncements = [
-        {
-          title: 'New Offline Batch Timings',
-          content: 'Dear students and parents, please note that offline tutoring timings have been adjusted to 4:30 PM - 7:30 PM (Monday to Saturday) to ensure maximum daylight focus. Please arrive 10 minutes early.',
-          tag: 'Important',
-          date: '10 Jul 2026'
-        },
-        {
-          title: 'Chemistry Printed Study Handouts',
-          content: 'Kindly bring your organic chemistry printed notebooks tomorrow. Sirisha Teacher will lead a dedicated problem-solving session on Alkynes nomenclature rules.',
-          tag: 'General',
-          date: '12 Jul 2026'
-        }
-      ];
-      await Announcement.insertMany(defaultAnnouncements);
-      console.log('Seeded announcements.');
-
-      // Seed Study Materials
-      const defaultStudy = [
-        {
-          title: 'Trigonometric Identities Cheat Sheet',
-          subject: 'Mathematics',
-          url: 'https://drive.google.com/drive/folders/demo1'
-        },
-        {
-          title: 'Periodic Table Trends Summary Note',
-          subject: 'Chemistry',
-          url: 'https://drive.google.com/drive/folders/demo2'
-        },
-        {
-          title: 'Solenoids & Magnetic Fields Handout',
-          subject: 'Physics',
-          url: 'https://drive.google.com/drive/folders/demo3'
-        }
-      ];
-      await StudyMaterial.insertMany(defaultStudy);
-      console.log('Seeded study materials.');
-
-      // Seed Doubts
-      const defaultDoubts = [
-        {
-          studentUsername: 'student',
-          studentName: 'Sandeep Goud',
-          subject: 'Chemistry',
-          question: 'Why does Nitrogen have a higher ionization potential than Oxygen even though Oxygen has a higher atomic number?',
-          status: 'Solved',
-          reply: 'This is due to the half-filled p-orbital stability of Nitrogen (1s² 2s² 2p³). Half-filled subshells are extra stable due to symmetrical distribution and exchange energy. Oxygen (2p⁴) easily loses its fourth electron to achieve a stable half-filled configuration.'
-        },
-        {
-          studentUsername: 'student',
-          studentName: 'Sandeep Goud',
-          subject: 'Mathematics',
-          question: 'How do I identify if the roots of a quadratic equation are imaginary without graphing?',
-          status: 'Pending',
-          reply: ''
-        }
-      ];
-      await Doubt.insertMany(defaultDoubts);
-      console.log('Seeded doubts.');
-
-      // Seed Inquiries
-      const defaultInquiries = [
-        {
-          studentName: 'Karthik Rao',
-          parentName: 'Ramanadha Rao',
-          studentClass: 'Class 9',
-          targetExam: 'IIT Foundation',
-          phoneNumber: '6301884617',
-          message: 'Looking for a chemistry batch starting next week. Needs conceptual help in formulas.',
-          date: 'Jul 10, 2026',
-          status: 'Pending'
-        },
-        {
-          studentName: 'Praneetha Reddy',
-          parentName: 'Kavitha Reddy',
-          studentClass: 'Class 7',
-          targetExam: 'IIT Foundation',
-          phoneNumber: '9618955830',
-          message: 'Wants to enroll for Mathematics foundation classes early. Kindly call back.',
-          date: 'Jul 12, 2026',
-          status: 'Contacted'
-        }
-      ];
-      await Inquiry.insertMany(defaultInquiries);
-      console.log('Seeded inquiries.');
+      console.log('Seeded admin account.');
       console.log('Database seeding completed successfully.');
     }
   } catch (error) {
@@ -292,16 +186,7 @@ app.post('/api/auth/google', async (req, res) => {
     let user = await User.findOne({ username: email.toLowerCase() });
 
     if (!user) {
-      // Automatically register as a student
-      console.log(`Automatically registering new student from Google login: ${name} (${email})`);
-      user = new User({
-        username: email.toLowerCase(),
-        password: 'google-oauth-managed-' + sub, // random/dummy password
-        fullName: name || 'Google User',
-        class: 'Unassigned',
-        role: 'student'
-      });
-      await user.save();
+      return res.status(403).json({ error: 'This email is not registered as a student account. Please contact the academy team to activate your account.' });
     }
 
     // Log in
@@ -309,7 +194,10 @@ app.post('/api/auth/google', async (req, res) => {
       username: user.username,
       fullName: user.fullName,
       class: user.class,
-      role: user.role
+      role: user.role,
+      studyMode: user.studyMode,
+      batchTimings: user.batchTimings,
+      campusLocation: user.campusLocation
     });
 
   } catch (error) {
@@ -333,7 +221,10 @@ app.post('/api/auth/login', async (req, res) => {
       username: user.username,
       fullName: user.fullName,
       class: user.class,
-      role: user.role
+      role: user.role,
+      studyMode: user.studyMode,
+      batchTimings: user.batchTimings,
+      campusLocation: user.campusLocation
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error during login' });
@@ -431,7 +322,11 @@ app.get('/api/tests', async (req, res) => {
     const { class: studentClass } = req.query;
     let filter = {};
     if (studentClass) {
-      filter.class = { $in: [studentClass, 'All Classes'] };
+      filter.$or = [
+        { class: { $in: [studentClass, 'All Classes'] } },
+        { class: { $exists: false } },
+        { class: null }
+      ];
     }
     const tests = await MockTest.find(filter);
     res.json(tests);
@@ -513,7 +408,11 @@ app.get('/api/study', async (req, res) => {
     const { class: studentClass } = req.query;
     let filter = {};
     if (studentClass) {
-      filter.class = { $in: [studentClass, 'All Classes'] };
+      filter.$or = [
+        { class: { $in: [studentClass, 'All Classes'] } },
+        { class: { $exists: false } },
+        { class: null }
+      ];
     }
     const study = await StudyMaterial.find(filter);
     res.json(study);
@@ -618,7 +517,7 @@ app.get('/api/students', async (req, res) => {
 
 app.post('/api/students', async (req, res) => {
   try {
-    const { username, password, fullName, class: studentClass } = req.body;
+    const { username, password, fullName, class: studentClass, studyMode, batchTimings, campusLocation } = req.body;
     if (!username || !password || !fullName || !studentClass) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -631,12 +530,50 @@ app.post('/api/students', async (req, res) => {
       password,
       fullName,
       class: studentClass,
-      role: 'student'
+      role: 'student',
+      studyMode: studyMode || 'Offline',
+      batchTimings: batchTimings || 'Mon to Sat | 4:30 PM - 7:30 PM',
+      campusLocation: campusLocation || 'Alwal Campus, Secunderabad'
     });
     const saved = await newStudent.save();
     res.status(201).json(saved);
   } catch (error) {
     res.status(500).json({ error: 'Server error creating student account' });
+  }
+});
+
+app.put('/api/students/:id', async (req, res) => {
+  try {
+    const { username, password, fullName, class: studentClass, studyMode, batchTimings, campusLocation } = req.body;
+    if (!username || !password || !fullName || !studentClass) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    const existingUser = await User.findOne({ 
+      username: username.toLowerCase(), 
+      _id: { $ne: req.params.id } 
+    });
+    if (existingUser) {
+      return res.status(400).json({ error: `Username "${username}" is already taken` });
+    }
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { 
+        username: username.toLowerCase(), 
+        password, 
+        fullName, 
+        class: studentClass,
+        studyMode,
+        batchTimings,
+        campusLocation
+      },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ error: 'Student account not found' });
+    }
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error updating student account' });
   }
 });
 
@@ -660,7 +597,11 @@ app.get('/api/meet-links', async (req, res) => {
     const { class: studentClass } = req.query;
     let filter = {};
     if (studentClass) {
-      filter.class = { $in: [studentClass, 'All Classes'] };
+      filter.$or = [
+        { class: { $in: [studentClass, 'All Classes'] } },
+        { class: { $exists: false } },
+        { class: null }
+      ];
     }
     const links = await MeetLink.find(filter);
     res.json(links);
@@ -705,7 +646,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start Server if executed directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
+

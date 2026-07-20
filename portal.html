@@ -65,11 +65,7 @@
                     <i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard
                 </button>
 
-                <!-- Help Info for default accounts -->
-                <div class="login-credentials-tip" id="credentialsTip">
-                    <p><strong>Demo Accounts:</strong></p>
-                    <p id="tipText">Student: <code>student</code> / Password: <code>student123</code></p>
-                </div>
+
 
                 <div class="divider-or" id="googleDivider">
                     <span>OR</span>
@@ -474,6 +470,21 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label for="studentRegStudyMode">Mode of Study *</label>
+                                <select id="studentRegStudyMode" required>
+                                    <option value="Offline" selected>Offline Batch</option>
+                                    <option value="Online">Online Batch</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentRegTimings">Batch Timings *</label>
+                                <input type="text" id="studentRegTimings" required placeholder="E.g., Mon to Sat | 4:30 PM - 7:30 PM" value="Mon to Sat | 4:30 PM - 7:30 PM">
+                            </div>
+                            <div class="form-group">
+                                <label for="studentRegLocation">Location / Campus *</label>
+                                <input type="text" id="studentRegLocation" required placeholder="E.g., Alwal Campus, Secunderabad" value="Alwal Campus, Secunderabad">
+                            </div>
+                            <div class="form-group">
                                 <label for="studentRegUsername">Login Username *</label>
                                 <input type="text" id="studentRegUsername" required placeholder="E.g., sahithi.b">
                             </div>
@@ -642,8 +653,8 @@
                     <div class="enrollment-details">
                         <span class="hero-tag">Enrolled Batch</span>
                         <h3 id="studentHeroClass">IIT Foundation (Class 9 Core)</h3>
-                        <p><i class="fa-solid fa-clock"></i> Offline Batches: Mon to Sat | 4:30 PM - 7:30 PM</p>
-                        <p><i class="fa-solid fa-circle-check"></i> Location: Alwal Campus, Secunderabad</p>
+                        <p id="studentHeroTimings"><i class="fa-solid fa-clock"></i> Offline Batches: Mon to Sat | 4:30 PM - 7:30 PM</p>
+                        <p id="studentHeroLocation"><i class="fa-solid fa-circle-check"></i> Location: Alwal Campus, Secunderabad</p>
                     </div>
                     <div class="enrollment-status-badge">
                         <i class="fa-solid fa-shield-halved"></i> Active Enrollment
@@ -802,6 +813,62 @@
                 </div>
                 <button type="submit" class="btn btn-gold btn-block">
                     <i class="fa-solid fa-comment-medical"></i> Save and Resolve Doubt
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal-backdrop hidden" id="editStudentModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h4>Edit Student Account Details</h4>
+                <button class="modal-close" onclick="closeEditStudentModal()">&times;</button>
+            </div>
+            <form id="editStudentForm" class="dashboard-form">
+                <input type="hidden" id="editStudentId">
+                <div class="form-group">
+                    <label for="editStudentFullName">Student's Full Name *</label>
+                    <input type="text" id="editStudentFullName" required placeholder="E.g., Sahithi Bhumireddy">
+                </div>
+                <div class="form-group">
+                    <label for="editStudentClass">Class/Standard *</label>
+                    <select id="editStudentClass" required>
+                        <option value="" disabled>Select Class</option>
+                        <option value="Class 6">Class 6 (IIT Foundation)</option>
+                        <option value="Class 7">Class 7 (IIT Foundation)</option>
+                        <option value="Class 8">Class 8 (IIT Foundation)</option>
+                        <option value="Class 9">Class 9 (IIT Foundation)</option>
+                        <option value="Class 10">Class 10 (IIT Foundation)</option>
+                        <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                        <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editStudentStudyMode">Mode of Study *</label>
+                    <select id="editStudentStudyMode" required>
+                        <option value="Offline">Offline Batch</option>
+                        <option value="Online">Online Batch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editStudentTimings">Batch Timings *</label>
+                    <input type="text" id="editStudentTimings" required placeholder="E.g., Mon to Sat | 4:30 PM - 7:30 PM">
+                </div>
+                <div class="form-group">
+                    <label for="editStudentLocation">Location / Campus *</label>
+                    <input type="text" id="editStudentLocation" required placeholder="E.g., Alwal Campus, Secunderabad">
+                </div>
+                <div class="form-group">
+                    <label for="editStudentUsername">Login Username *</label>
+                    <input type="text" id="editStudentUsername" required placeholder="E.g., sahithi.b">
+                </div>
+                <div class="form-group">
+                    <label for="editStudentPassword">Login Password *</label>
+                    <input type="text" id="editStudentPassword" required placeholder="Choose password">
+                </div>
+                <button type="submit" class="btn btn-gold btn-block">
+                    <i class="fa-solid fa-user-pen"></i> Save Changes
                 </button>
             </form>
         </div>

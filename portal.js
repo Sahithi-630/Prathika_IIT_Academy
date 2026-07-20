@@ -7,12 +7,15 @@ let currentRole = 'student'; // 'student' or 'admin'
 let loggedInUser = null; // Holds user object
 let loadedInquiries = []; // Cache loaded inquiries
 let loadedDoubts = []; // Cache loaded doubts
+let loadedStudents = []; // Cache loaded students
 
 // Override fetch to automatically redirect relative API calls to localhost:3000 if running on a dev server or file scheme
 const originalFetch = window.fetch;
 window.fetch = function(input, init) {
     if (typeof input === 'string' && input.startsWith('/api/')) {
-        if (window.location.protocol === 'file:' || !window.location.port || window.location.port !== '3000') {
+        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isFileProtocol = window.location.protocol === 'file:';
+        if (isFileProtocol || (isLocalHost && window.location.port !== '3000')) {
             input = `http://localhost:3000${input}`;
         }
     }
@@ -81,9 +84,6 @@ function switchLoginRole(role) {
     currentRole = role;
     const btnStudent = document.getElementById('btnStudentRole');
     const btnAdmin = document.getElementById('btnAdminRole');
-    const registerPrompt = document.getElementById('registerPrompt');
-    const credentialsTip = document.getElementById('credentialsTip');
-    const tipText = document.getElementById('tipText');
     const loginError = document.getElementById('loginErrorMessage');
     const googleBtn = document.getElementById('googleSignInButton');
     const googleDiv = document.getElementById('googleDivider');
@@ -93,17 +93,11 @@ function switchLoginRole(role) {
     if (role === 'student') {
         btnStudent.classList.add('active');
         btnAdmin.classList.remove('active');
-        registerPrompt.classList.remove('hidden');
-        credentialsTip.classList.remove('hidden');
-        tipText.innerHTML = `Student: <code>student</code> / Password: <code>student123</code>`;
         if (googleBtn) googleBtn.classList.remove('hidden');
         if (googleDiv) googleDiv.classList.remove('hidden');
     } else {
         btnStudent.classList.remove('active');
         btnAdmin.classList.add('active');
-        registerPrompt.classList.add('hidden');
-        credentialsTip.classList.remove('hidden');
-        tipText.innerHTML = `Admin: <code>admin</code> / Password: <code>admin123</code>`;
         if (googleBtn) googleBtn.classList.add('hidden');
         if (googleDiv) googleDiv.classList.add('hidden');
     }
@@ -728,13 +722,24 @@ function setupAdminForms() {
             e.preventDefault();
             const fullName = document.getElementById('studentRegFullName').value.trim();
             const studentClass = document.getElementById('studentRegClass').value;
+            const studyMode = document.getElementById('studentRegStudyMode').value;
+            const batchTimings = document.getElementById('studentRegTimings').value.trim();
+            const campusLocation = document.getElementById('studentRegLocation').value.trim();
             const username = document.getElementById('studentRegUsername').value.trim();
             const password = document.getElementById('studentRegPassword').value.trim();
 
             fetch('/api/students', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, fullName, class: studentClass })
+                body: JSON.stringify({ 
+                    username, 
+                    password, 
+                    fullName, 
+                    class: studentClass,
+                    studyMode,
+                    batchTimings,
+                    campusLocation
+                })
             })
             .then(res => {
                 if (!res.ok) {
@@ -746,6 +751,46 @@ function setupAdminForms() {
             .catch(err => {
                 console.error(err);
                 alert(err.message || 'Error creating student account');
+            });
+        };
+    }
+
+    const editStudentForm = document.getElementById('editStudentForm');
+    if (editStudentForm) {
+        editStudentForm.onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editStudentId').value;
+            const fullName = document.getElementById('editStudentFullName').value.trim();
+            const studentClass = document.getElementById('editStudentClass').value;
+            const studyMode = document.getElementById('editStudentStudyMode').value;
+            const batchTimings = document.getElementById('editStudentTimings').value.trim();
+            const campusLocation = document.getElementById('editStudentLocation').value.trim();
+            const username = document.getElementById('editStudentUsername').value.trim();
+            const password = document.getElementById('editStudentPassword').value.trim();
+
+            fetch(`/api/students/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    username, 
+                    password, 
+                    fullName, 
+                    class: studentClass,
+                    studyMode,
+                    batchTimings,
+                    campusLocation
+                })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(data => { throw new Error(data.error || 'Failed to update student account') });
+                }
+                closeEditStudentModal();
+                renderAdminStudents();
+            })
+            .catch(err => {
+                console.error(err);
+                alert(err.message || 'Error updating student account');
             });
         };
     }
@@ -806,6 +851,14 @@ function openStudentDashboard(user) {
     document.getElementById('studentProfileClass').textContent = user.class;
     document.getElementById('studentWelcomeName').textContent = user.fullName;
     document.getElementById('studentHeroClass').textContent = `${user.class} Core Prep`;
+
+    // Render customized batch study details
+    const mode = user.studyMode || 'Offline';
+    const timings = user.batchTimings || 'Mon to Sat | 4:30 PM - 7:30 PM';
+    const location = user.campusLocation || 'Alwal Campus, Secunderabad';
+
+    document.getElementById('studentHeroTimings').innerHTML = `<i class="fa-solid fa-clock"></i> ${mode} Batches: ${timings}`;
+    document.getElementById('studentHeroLocation').innerHTML = `<i class="fa-solid fa-circle-check"></i> Location: ${location}`;
 
     switchDashboardTab('student', 'student-courses');
     
@@ -1056,7 +1109,7 @@ function renderMockGoogleButton() {
     
     btn.innerHTML = `
         <svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'><path fill='%234285F4' d='M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8c-.2 1.1-.8 2-1.8 2.6v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.4z'/><path fill='%2334A853' d='M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.8-3.1.8-2.4 0-4.4-1.6-5.1-3.8H.9v2.3C2.4 15.9 5.5 18 9 18z'/><path fill='%23FBBC05' d='M3.9 10.6c-.2-.5-.3-1.1-.3-1.6s.1-1.1.3-1.6V5.1H.9C.3 6.3 0 7.6 0 9s.3 2.7.9 3.9l3-2.3z'/><path fill='%23EA4335' d='M9 3.6c1.3 0 2.5.4 3.4 1.3l2.6-2.6C13.4 1 11.4 0 9 0 5.5 0 2.4 2.1.9 5.1l3 2.3c.7-2.2 2.7-3.8 5.1-3.8z'/></svg>
-        <span>Sign in with Google (Demo)</span>
+        <span>Sign in with Google</span>
     `;
     
     btn.onmouseover = () => { 
@@ -1143,6 +1196,7 @@ function renderAdminStudents() {
     fetch('/api/students')
         .then(res => res.json())
         .then(data => {
+            loadedStudents = data;
             const listContainer = document.getElementById('adminStudentsList');
             if (!listContainer) return;
             listContainer.innerHTML = '';
@@ -1163,15 +1217,40 @@ function renderAdminStudents() {
                     <td><code>${escapeHtml(student.username)}</code></td>
                     <td>${passwordDisplay}</td>
                     <td>
-                        <button class="btn-delete" onclick="deleteStudent('${student._id}')" title="Delete Student">
-                            <i class="fa-regular fa-trash-can"></i>
-                        </button>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn-resolve" style="padding: 4px 8px; font-size: 0.75rem; background: var(--color-blue); border-color: var(--color-blue);" onclick="openEditStudentModal('${student._id}')" title="Edit Student">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                            <button class="btn-delete" style="padding: 4px 8px;" onclick="deleteStudent('${student._id}')" title="Delete Student">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 listContainer.appendChild(row);
             });
         })
         .catch(err => console.error('Error rendering admin students:', err));
+}
+
+function openEditStudentModal(id) {
+    const student = loadedStudents.find(s => s._id === id);
+    if (student) {
+        document.getElementById('editStudentId').value = student._id;
+        document.getElementById('editStudentFullName').value = student.fullName;
+        document.getElementById('editStudentClass').value = student.class;
+        document.getElementById('editStudentStudyMode').value = student.studyMode || 'Offline';
+        document.getElementById('editStudentTimings').value = student.batchTimings || 'Mon to Sat | 4:30 PM - 7:30 PM';
+        document.getElementById('editStudentLocation').value = student.campusLocation || 'Alwal Campus, Secunderabad';
+        document.getElementById('editStudentUsername').value = student.username;
+        document.getElementById('editStudentPassword').value = student.password.startsWith('google-oauth-managed-') ? '' : student.password;
+        document.getElementById('editStudentModal').classList.remove('hidden');
+    }
+}
+
+function closeEditStudentModal() {
+    document.getElementById('editStudentModal').classList.add('hidden');
+    document.getElementById('editStudentForm').reset();
 }
 
 function deleteStudent(id) {
