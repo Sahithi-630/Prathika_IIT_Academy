@@ -19,15 +19,39 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(MONGODB_URI)
-  .then(() => {
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected || mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return;
+  }
+  if (!MONGODB_URI) {
+    console.error('MONGODB_URI is not set in environment variables');
+    throw new Error('MONGODB_URI environment variable is missing in server settings');
+  }
+  try {
+    await mongoose.connect(MONGODB_URI);
+    isConnected = true;
     console.log('Connected to MongoDB successfully');
-    seedDatabase();
-  })
-  .catch((err) => {
+    await seedDatabase();
+  } catch (err) {
     console.error('Error connecting to MongoDB:', err);
-  });
+    throw err;
+  }
+}
+
+// Middleware to ensure DB connection before handling API routes
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    try {
+      await connectDB();
+    } catch (err) {
+      return res.status(500).json({ error: 'Database connection failed: ' + (err.message || err) });
+    }
+  }
+  next();
+});
 
 // ==========================================
 // SCHEMAS & MODELS
@@ -227,7 +251,8 @@ app.post('/api/auth/login', async (req, res) => {
       campusLocation: user.campusLocation
     });
   } catch (error) {
-    res.status(500).json({ error: 'Server error during login' });
+    console.error('Error in /api/auth/login:', error);
+    res.status(500).json({ error: error.message || 'Server error during login' });
   }
 });
 
