@@ -244,7 +244,45 @@ function logout() {
 // ==========================================
 // 2. TABS & SWITCHING OPERATIONS
 // ==========================================
+function toggleMobileSidebar() {
+    const adminPortal = document.getElementById('adminPortal');
+    const studentPortal = document.getElementById('studentPortal');
+    
+    let activeDashboard = null;
+    if (adminPortal && !adminPortal.classList.contains('hidden')) {
+        activeDashboard = adminPortal;
+    } else if (studentPortal && !studentPortal.classList.contains('hidden')) {
+        activeDashboard = studentPortal;
+    }
+    
+    if (!activeDashboard) return;
+    
+    const sidebar = activeDashboard.querySelector('.portal-sidebar');
+    let overlay = document.querySelector('.sidebar-overlay');
+    
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.onclick = closeMobileSidebar;
+        document.body.appendChild(overlay);
+    }
+
+    if (sidebar) {
+        const isActive = sidebar.classList.toggle('active');
+        overlay.classList.toggle('active', isActive);
+    }
+}
+
+function closeMobileSidebar() {
+    document.querySelectorAll('.portal-sidebar').forEach(sb => sb.classList.remove('active'));
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
 function switchDashboardTab(role, tabId) {
+    // Automatically close sidebar on mobile when a tab is selected
+    closeMobileSidebar();
+
     const activeDashboard = document.getElementById(`${role}Portal`);
     
     // Deactivate all sidebar active tabs
@@ -460,7 +498,7 @@ function renderAdminTests() {
             testsList.innerHTML = '';
 
             if (tests.length === 0) {
-                testsList.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No mock tests scheduled.</td></tr>`;
+                testsList.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No mock tests scheduled.</td></tr>`;
                 return;
             }
 
@@ -475,6 +513,12 @@ function renderAdminTests() {
                     <td><span class="status-badge status-enrolled">${escapeHtml(test.class || 'All Classes')}</span></td>
                     <td>${escapeHtml(formattedDate)}</td>
                     <td><div style="font-size: 0.8rem; line-height: 1.4;">${escapeHtml(test.syllabus)}</div></td>
+                    <td>
+                        ${test.examLink ? 
+                            `<a href="${escapeHtml(test.examLink)}" target="_blank" class="study-download-link"><i class="fa-solid fa-up-right-from-square"></i> Open Link</a>` : 
+                            `<span style="color: var(--color-text-gray); font-size: 0.8rem;">No Link</span>`
+                        }
+                    </td>
                     <td>
                         <button class="btn-delete" onclick="deleteMockTest('${test.id}')" title="Delete Test">
                             <i class="fa-regular fa-trash-can"></i>
@@ -656,11 +700,12 @@ function setupAdminForms() {
             const syllabus = document.getElementById('testSyllabus').value.trim();
             const date = document.getElementById('testDate').value;
             const time = document.getElementById('testTime').value;
+            const examLink = document.getElementById('testExamLink').value.trim();
 
             fetch('/api/tests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject, dateTime: `${date}T${time}`, syllabus, class: targetClass })
+                body: JSON.stringify({ subject, dateTime: `${date}T${time}`, syllabus, class: targetClass, examLink })
             })
             .then(res => {
                 if (!res.ok) throw new Error('Failed to schedule test');
@@ -876,7 +921,7 @@ function renderStudentTests() {
             testsList.innerHTML = '';
 
             if (tests.length === 0) {
-                testsList.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No mock tests scheduled. Check back later!</td></tr>`;
+                testsList.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-gray); padding: 20px;">No mock tests scheduled. Check back later!</td></tr>`;
                 return;
             }
 
@@ -890,6 +935,12 @@ function renderStudentTests() {
                     <td><strong>${escapeHtml(test.subject)}</strong></td>
                     <td>${escapeHtml(formattedDate)}</td>
                     <td><div style="font-size: 0.85rem; line-height: 1.4;">${escapeHtml(test.syllabus)}</div></td>
+                    <td>
+                        ${test.examLink ? 
+                            `<a href="${escapeHtml(test.examLink)}" target="_blank" class="btn btn-sm btn-gold" style="font-size: 0.75rem; padding: 4px 8px; text-decoration: none;"><i class="fa-solid fa-up-right-from-square"></i> Start Exam</a>` : 
+                            `<span style="color: var(--color-text-gray); font-size: 0.8rem;">Offline / Link Pending</span>`
+                        }
+                    </td>
                 `;
                 testsList.appendChild(row);
             });

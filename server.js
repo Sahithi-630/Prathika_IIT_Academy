@@ -85,7 +85,8 @@ const mockTestSchema = new mongoose.Schema({
   subject: { type: String, required: true },
   dateTime: { type: String, required: true },
   syllabus: { type: String, required: true },
-  class: { type: String, required: true, default: 'All Classes' }
+  class: { type: String, required: true, default: 'All Classes' },
+  examLink: { type: String, default: '' }
 });
 const MockTest = mongoose.model('MockTest', mockTestSchema);
 
@@ -362,11 +363,11 @@ app.get('/api/tests', async (req, res) => {
 
 app.post('/api/tests', async (req, res) => {
   try {
-    const { subject, dateTime, syllabus, class: targetClass } = req.body;
+    const { subject, dateTime, syllabus, class: targetClass, examLink } = req.body;
     if (!subject || !dateTime || !syllabus || !targetClass) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-    const newTest = new MockTest({ subject, dateTime, syllabus, class: targetClass });
+    const newTest = new MockTest({ subject, dateTime, syllabus, class: targetClass, examLink: examLink || '' });
     const saved = await newTest.save();
     res.status(201).json(saved);
   } catch (error) {

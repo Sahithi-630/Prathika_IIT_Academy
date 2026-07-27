@@ -88,6 +88,9 @@
                     <h4>Prathika Academy</h4>
                     <span>Admin Panel</span>
                 </div>
+                <button class="mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Close Menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             
             <nav class="sidebar-menu">
@@ -136,7 +139,13 @@
         <!-- Main Dashboard Viewport -->
         <main class="portal-main">
             <header class="main-header">
-                <h2>Welcome Back, Sirisha</h2>
+                <div class="header-left">
+                    <button class="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
+                        <i class="fa-solid fa-bars"></i>
+                        <span>Menu</span>
+                    </button>
+                    <h2>Welcome Back, Sirisha</h2>
+                </div>
                 <span class="current-date" id="adminCurrentDate">July 13, 2026</span>
             </header>
 
@@ -284,6 +293,10 @@
                                     <input type="time" id="testTime" required>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label for="testExamLink">Exam Portal Link (Optional)</label>
+                                <input type="url" id="testExamLink" placeholder="https://examportal.com/test-id">
+                            </div>
                             <button type="submit" class="btn btn-gold btn-block">
                                 <i class="fa-solid fa-calendar-plus"></i> Schedule Test
                             </button>
@@ -301,6 +314,7 @@
                                         <th>Target Batch</th>
                                         <th>Date & Time</th>
                                         <th>Syllabus Details</th>
+                                        <th>Exam Link</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -605,6 +619,9 @@
                     <h4>Prathika Academy</h4>
                     <span>Student Panel</span>
                 </div>
+                <button class="mobile-sidebar-close" onclick="closeMobileSidebar()" aria-label="Close Menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
             
             <nav class="sidebar-menu">
@@ -642,7 +659,13 @@
         <!-- Main Dashboard Viewport -->
         <main class="portal-main">
             <header class="main-header">
-                <h2>Welcome, <span id="studentWelcomeName">Student</span></h2>
+                <div class="header-left">
+                    <button class="mobile-sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
+                        <i class="fa-solid fa-bars"></i>
+                        <span>Menu</span>
+                    </button>
+                    <h2>Welcome, <span id="studentWelcomeName">Student</span></h2>
+                </div>
                 <span class="current-date" id="studentCurrentDate">July 13, 2026</span>
             </header>
 
@@ -674,6 +697,7 @@
                                     <th>Subject</th>
                                     <th>Date & Time</th>
                                     <th>Topics Covered (Syllabus)</th>
+                                    <th>Access Exam</th>
                                 </tr>
                             </thead>
                             <tbody id="studentTestsList">
