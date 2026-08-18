@@ -459,54 +459,65 @@
             <!-- Tab 7: Students Manager -->
             <section class="tab-panel" id="admin-students">
                 <div class="split-layout">
-                    <!-- Column Left: Register a New Student -->
-                    <div class="form-card">
-                        <h4>Register New Student Account</h4>
-                        <p class="form-desc">Create login credentials for premium academy students.</p>
-                        <form id="adminAddStudentForm" class="dashboard-form">
-                            <div class="form-group">
-                                <label for="studentRegFullName">Student's Full Name *</label>
-                                <input type="text" id="studentRegFullName" required placeholder="E.g., Sahithi Bhumireddy">
+                    <!-- Column Left: Register & Stats -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="form-card" style="margin-bottom: 0;">
+                            <h4>Register New Student Account</h4>
+                            <p class="form-desc">Create login credentials for premium academy students.</p>
+                            <form id="adminAddStudentForm" class="dashboard-form">
+                                <div class="form-group">
+                                    <label for="studentRegFullName">Student's Full Name *</label>
+                                    <input type="text" id="studentRegFullName" required placeholder="E.g., Sahithi Bhumireddy">
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentRegClass">Class/Standard *</label>
+                                    <select id="studentRegClass" required>
+                                        <option value="" disabled selected>Select Class</option>
+                                        <option value="Class 8">Class 8 (IIT Foundation)</option>
+                                        <option value="Class 9 - Section A">Class 9 - Section A (IIT Foundation)</option>
+                                        <option value="Class 9 - Section B">Class 9 - Section B (IIT Foundation)</option>
+                                        <option value="Class 10">Class 10 (IIT Foundation)</option>
+                                        <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
+                                        <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentRegStudyMode">Mode of Study *</label>
+                                    <select id="studentRegStudyMode" required>
+                                        <option value="Offline">Offline Batch</option>
+                                        <option value="Online">Online Batch</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentRegTimings">Batch Timings *</label>
+                                    <input type="text" id="studentRegTimings" required placeholder="E.g., Mon to Sat | 4:30 PM - 7:30 PM" value="Mon to Sat | 4:30 PM - 7:30 PM">
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentRegLocation">Location / Campus *</label>
+                                    <input type="text" id="studentRegLocation" required placeholder="E.g., Alwal Campus, Secunderabad" value="Alwal Campus, Secunderabad">
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentRegUsername">Login Username *</label>
+                                    <input type="text" id="studentRegUsername" required placeholder="E.g., sahithi.b">
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentRegPassword">Login Password *</label>
+                                    <input type="text" id="studentRegPassword" required placeholder="Choose password">
+                                </div>
+                                <button type="submit" class="btn btn-gold btn-block">
+                                    <i class="fa-solid fa-user-plus"></i> Create Student Account
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Student Counts by Class Card -->
+                        <div class="form-card">
+                            <h4>Class-wise Enrollment Summary</h4>
+                            <p class="form-desc">Total count of active students registered in each standard.</p>
+                            <div class="class-counts-list" id="adminClassCountsList" style="margin-top: 15px;">
+                                <!-- Populated dynamically -->
                             </div>
-                            <div class="form-group">
-                                <label for="studentRegClass">Class/Standard *</label>
-                                <select id="studentRegClass" required>
-                                    <option value="" disabled selected>Select Class</option>
-                                    <option value="Class 8">Class 8 (IIT Foundation)</option>
-                                    <option value="Class 9 - Section A">Class 9 - Section A (IIT Foundation)</option>
-                                    <option value="Class 9 - Section B">Class 9 - Section B (IIT Foundation)</option>
-                                    <option value="Class 10">Class 10 (IIT Foundation)</option>
-                                    <option value="Intermediate 1st Year">Intermediate 1st Year (JEE/NEET)</option>
-                                    <option value="Intermediate 2nd Year">Intermediate 2nd Year (JEE/NEET)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="studentRegStudyMode">Mode of Study *</label>
-                                <select id="studentRegStudyMode" required>
-                                    <option value="Offline" selected>Offline Batch</option>
-                                    <option value="Online">Online Batch</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="studentRegTimings">Batch Timings *</label>
-                                <input type="text" id="studentRegTimings" required placeholder="E.g., Mon to Sat | 4:30 PM - 7:30 PM" value="Mon to Sat | 4:30 PM - 7:30 PM">
-                            </div>
-                            <div class="form-group">
-                                <label for="studentRegLocation">Location / Campus *</label>
-                                <input type="text" id="studentRegLocation" required placeholder="E.g., Alwal Campus, Secunderabad" value="Alwal Campus, Secunderabad">
-                            </div>
-                            <div class="form-group">
-                                <label for="studentRegUsername">Login Username *</label>
-                                <input type="text" id="studentRegUsername" required placeholder="E.g., sahithi.b">
-                            </div>
-                            <div class="form-group">
-                                <label for="studentRegPassword">Login Password *</label>
-                                <input type="text" id="studentRegPassword" required placeholder="Choose password">
-                            </div>
-                            <button type="submit" class="btn btn-gold btn-block">
-                                <i class="fa-solid fa-user-plus"></i> Create Student Account
-                            </button>
-                        </form>
+                        </div>
                     </div>
 
                     <!-- Column Right: List of Registered Students -->

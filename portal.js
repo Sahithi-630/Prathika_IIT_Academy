@@ -1248,6 +1248,67 @@ function renderAdminStudents() {
         .then(res => res.json())
         .then(data => {
             loadedStudents = data;
+            
+            // Calculate enrollment breakdown by class standard
+            const classCounts = {
+                'Class 8': 0,
+                'Class 9 - Section A': 0,
+                'Class 9 - Section B': 0,
+                'Class 10': 0,
+                'Intermediate 1st Year': 0,
+                'Intermediate 2nd Year': 0
+            };
+
+            data.forEach(student => {
+                const sClass = student.class;
+                if (classCounts.hasOwnProperty(sClass)) {
+                    classCounts[sClass]++;
+                }
+            });
+
+            const countsContainer = document.getElementById('adminClassCountsList');
+            if (countsContainer) {
+                countsContainer.innerHTML = '';
+                
+                const displayOrder = [
+                    { key: 'Class 8', label: 'Class 8 (IIT Foundation)' },
+                    { key: 'Class 9 - Section A', label: 'Class 9 - Section A' },
+                    { key: 'Class 9 - Section B', label: 'Class 9 - Section B' },
+                    { key: 'Class 10', label: 'Class 10 (IIT Foundation)' },
+                    { key: 'Intermediate 1st Year', label: 'Intermediate 1st Year' },
+                    { key: 'Intermediate 2nd Year', label: 'Intermediate 2nd Year' }
+                ];
+                
+                let totalStudentsCount = 0;
+                
+                displayOrder.forEach(item => {
+                    const count = classCounts[item.key] || 0;
+                    totalStudentsCount += count;
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);';
+                    itemEl.innerHTML = `
+                        <span style="font-size: 0.9rem; font-weight: 500;">
+                            <i class="fa-solid fa-user-graduate" style="color: var(--color-gold); margin-right: 8px;"></i> ${escapeHtml(item.label)}
+                        </span>
+                        <span class="status-badge status-enrolled" style="font-size: 0.8rem; font-weight: 700; border-radius: 20px; padding: 2px 10px;">
+                            ${count} ${count === 1 ? 'Student' : 'Students'}
+                        </span>
+                    `;
+                    countsContainer.appendChild(itemEl);
+                });
+                
+                const totalEl = document.createElement('div');
+                totalEl.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-top: 10px; background: rgba(212, 175, 55, 0.05); border-radius: 4px; border: 1px dashed rgba(212, 175, 55, 0.2);';
+                totalEl.innerHTML = `
+                    <span style="font-size: 0.95rem; font-weight: 700; color: var(--color-gold);">
+                        <i class="fa-solid fa-users" style="margin-right: 8px;"></i> Total Registered
+                    </span>
+                    <strong style="color: var(--color-gold); font-size: 1rem;">${totalStudentsCount} Students</strong>
+                `;
+                countsContainer.appendChild(totalEl);
+            }
+
             const listContainer = document.getElementById('adminStudentsList');
             if (!listContainer) return;
             listContainer.innerHTML = '';
