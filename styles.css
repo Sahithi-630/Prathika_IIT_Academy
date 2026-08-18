@@ -464,7 +464,7 @@ ul {
 }
 
 .hero-title {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-size: clamp(2.2rem, 5.2vw, 3.8rem);
     font-weight: 800;
     line-height: 1.15;
     letter-spacing: -1px;
@@ -484,6 +484,11 @@ ul {
     flex-wrap: wrap;
     gap: 16px;
     margin-bottom: 60px;
+}
+
+.hero-actions .btn {
+    font-size: 1.25rem;
+    padding: 18px 44px;
 }
 
 /* Stats panel */
@@ -555,9 +560,9 @@ ul {
 
 .section-tag {
     font-family: var(--ff-headings);
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 2.5px;
     color: var(--clr-gold);
     text-transform: uppercase;
     display: block;
