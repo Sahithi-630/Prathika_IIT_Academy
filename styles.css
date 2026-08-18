@@ -638,7 +638,7 @@ ul {
 }
 
 .founder-badge-circle:hover .founder-img {
-    transform: scale(1.08);
+    transform: scale(1.08) rotate(-45deg);
 }
 
 /* Floating Card decoration */

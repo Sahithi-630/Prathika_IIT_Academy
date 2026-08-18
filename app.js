@@ -89,6 +89,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Hash-based Tab Routing
+    const handleTabHash = () => {
+        const hash = window.location.hash;
+        if (hash) {
+            const targetBtn = document.querySelector(`.tab-btn[data-target="${hash.substring(1)}"]`);
+            if (targetBtn) {
+                targetBtn.click();
+                const coursesSection = document.getElementById('courses');
+                if (coursesSection) {
+                    setTimeout(() => {
+                        coursesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            }
+        }
+    };
+
+    // Run hash check on load & listen to changes
+    handleTabHash();
+    window.addEventListener('hashchange', handleTabHash);
+
 
     /* ==========================================================================
        4. PREMIUM TESTIMONIALS SLIDER
