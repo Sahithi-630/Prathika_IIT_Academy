@@ -356,7 +356,7 @@ body.portal-body {
 .sidebar-logo {
     width: 45px;
     height: 45px;
-    border-radius: var(--border-radius-sm);
+    border-radius: 50%;
     object-fit: cover;
     border: 1px solid var(--color-gold);
 }

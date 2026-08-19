@@ -238,9 +238,9 @@ ul {
 }
 
 .logo-wrapper {
-    width: 68px;
-    height: 42px;
-    border-radius: 6px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     border: 1.5px solid var(--clr-gold);
     overflow: hidden;
     background-color: var(--clr-navy-dark);
@@ -252,8 +252,8 @@ ul {
 }
 
 .main-header.scrolled .logo-wrapper {
-    width: 58px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
 }
 
 .logo-img {
@@ -1855,9 +1855,9 @@ ul {
 }
 
 .mini-logo {
-    width: 58px;
-    height: 36px;
-    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
 }
 
 .footer-desc {
