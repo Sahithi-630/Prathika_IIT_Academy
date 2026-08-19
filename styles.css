@@ -545,6 +545,30 @@ ul {
     fill: var(--clr-bg-light);
 }
 
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: auto;
+        padding-top: calc(var(--header-height) + 30px);
+        padding-bottom: 80px;
+    }
+    .badge-gold {
+        margin-bottom: 16px;
+    }
+    .hero-subtitle {
+        margin-bottom: 24px;
+    }
+    .hero-actions {
+        margin-bottom: 40px;
+    }
+    .hero-stats {
+        gap: 20px;
+        padding-top: 20px;
+    }
+    .stat-num {
+        font-size: 1.8rem;
+    }
+}
+
 /* --------------------------------------------------------------------------
    5. FOUNDER STORY SECTION (Sirisha)
    -------------------------------------------------------------------------- */
