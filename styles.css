@@ -2099,7 +2099,7 @@ ul {
     transform: translateX(4px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991px) {
     .programs-teaser-grid {
         grid-template-columns: 1fr;
         gap: 20px;
