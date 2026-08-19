@@ -1032,6 +1032,15 @@ ul {
     display: flex;
     justify-content: center;
 }
+.panel-banner-img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: var(--shadow-mid);
+    display: block;
+}
 
 .visual-card {
     background-color: var(--clr-navy-dark);
